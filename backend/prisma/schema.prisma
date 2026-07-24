@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  username         String             @unique
+  createdAt        DateTime           @default(now())
+  readingProgress  ReadingProgress[]
+  bookmarks        Bookmark[]
+  readingHistory   ReadingHistory[]
+}
+
+model Comic {
+  id               Int                @id @default(autoincrement())
+  title            String
+  description      String?            @db.Text
+  coverUrl         String?            @db.Text
+  sourceId         String?
+  createdAt        DateTime           @default(now())
+  chapters         Chapter[]
+  readingProgress  ReadingProgress[]
+  bookmarks        Bookmark[]
+  readingHistory   ReadingHistory[]
+}
+
+model Chapter {
+  id               Int                @id @default(autoincrement())
+  comicId          Int
+  comic            Comic              @relation(fields: [comicId], references: [id], onDelete: Cascade)
+  title            String?
+  chapterNumber    Float
+  createdAt        DateTime           @default(now())
+  pages            Page[]
+  readingProgress  ReadingProgress[]
+  readingHistory   ReadingHistory[]
+}
+
+model Page {
+  id               Int      @id @default(autoincrement())
+  chapterId        Int
+  chapter          Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  pageNumber       Int
+  imageUrl         String   @db.Text
+}
+
+model ReadingProgress {
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comicId          Int
+  comic            Comic    @relation(fields: [comicId], references: [id], onDelete: Cascade)
+  chapterId        Int
+  chapter          Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  pageNumber       Int
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  @@id([userId, comicId])
+}
+
+model Bookmark {
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comicId          Int
+  comic            Comic    @relation(fields: [comicId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+
+  @@id([userId, comicId])
+}
+
+model ReadingHistory {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comicId          Int
+  comic            Comic    @relation(fields: [comicId], references: [id], onDelete: Cascade)
+  chapterId        Int
+  chapter          Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  readAt           DateTime @default(now())
+}
