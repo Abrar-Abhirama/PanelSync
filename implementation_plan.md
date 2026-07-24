@@ -6,8 +6,8 @@ As requested, the database will store **image URLs**, not the physical image fil
 
 ## Technology Stack
 - **Frontend**: React / Next.js + TypeScript
-- **Backend API**: Java + Spring Boot
-- **Database**: PostgreSQL
+- **Backend API**: Node.js + Express (JavaScript)
+- **Database**: PostgreSQL (using Prisma or Sequelize as ORM)
 - **Scraper System**: Python (with ecosystem tools like Celery for queueing, depending on future choices)
 - **Cache**: Redis
 - **Deployment**: Docker
@@ -15,7 +15,7 @@ As requested, the database will store **image URLs**, not the physical image fil
 ## User Review Required
 
 > [!IMPORTANT]
-> Please review the initial architecture and database schema (Phase 1) below. As recommended, we will start with the **database design and API contracts** first before building the scraper or frontend. The technology stack has been updated to match your preference.
+> The plan has been updated to switch the backend from Java (Spring Boot) to **Node.js (Express) using JavaScript**. This allows us to use `package.json` for dependency management as requested. Please review the updated technology stack and Phase 1 plan.
 
 ## Open Questions
 
@@ -40,7 +40,7 @@ User Features (Milestone 2):
 - `bookmarks`: user_id, comic_id, created_at
 - `reading_history`: user_id, comic_id, chapter_id, read_at
 
-**2. Backend API Contracts (Java + Spring Boot)**
+**2. Backend API Contracts (Node.js + Express)**
 Creating the basic REST API endpoints:
 - `GET /api/comics` - Get a list of comics
 - `GET /api/comics/{id}` - Get comic details
@@ -100,7 +100,7 @@ Adding the performance, search, and observability layers.
 ## Verification Plan
 
 ### Automated Tests
-- **Backend API (Spring Boot)**: Unit testing for each endpoint using JUnit/Mockito.
+- **Backend API (Node.js)**: Unit testing for each endpoint using Jest or Mocha/Chai.
 - **Scraper (Python)**: Create *HTML Fixtures* to ensure the parser can extract data from static HTML, which will *fail* if the source HTML structure changes.
 
 ### Manual Verification
