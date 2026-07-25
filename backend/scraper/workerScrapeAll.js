@@ -28,6 +28,7 @@ async function runWorker() {
             let totalNewComicsAdded = 0;
             try {
                 if (typeof adapter.getBrowse === 'function') {
+                    let comicBatch = [];
                     // Fetch until the page is empty (unlimited)
                     for (let p = 1; ; p++) {
                         console.log(`Fetching page ${p} for ${adapter.sourceName}...`);
@@ -36,34 +37,48 @@ async function runWorker() {
                             const pageComics = await adapter.getBrowse(p);
                             if (!pageComics || pageComics.length === 0) break;
                             
-                            // Save to DB immediately per page
-                            let pageNewComics = 0;
-                            for (const c of pageComics) {
-                                try {
-                                    const existing = await prisma.comic.findUnique({ where: { sourceId: c.sourceId } });
-                                    if (!existing) {
-                                        await prisma.comic.create({
-                                            data: {
-                                                sourceId: c.sourceId,
-                                                title: c.title,
-                                                coverUrl: c.coverUrl,
-                                                sourceName: adapter.sourceName
-                                            }
-                                        });
-                                        pageNewComics++;
-                                        totalNewComicsAdded++;
-                                    }
-                                } catch (e) {
-                                    // Ignore unique constraint errors
-                                }
+                            comicBatch = comicBatch.concat(pageComics);
+                            
+                            // Save ke DB secara BATCH setiap 5 halaman (sekitar 100-250 komik sekaligus)
+                            if (p % 5 === 0) {
+                                const dataToInsert = comicBatch.map(c => ({
+                                    sourceId: c.sourceId,
+                                    title: c.title,
+                                    coverUrl: c.coverUrl,
+                                    sourceName: adapter.sourceName
+                                }));
+                                
+                                const result = await prisma.comic.createMany({
+                                    data: dataToInsert,
+                                    skipDuplicates: true
+                                });
+                                
+                                totalNewComicsAdded += result.count;
+                                console.log(`Batch tersimpan! ${result.count} komik baru ditambahkan ke DB. (Total sejauh ini: ${totalNewComicsAdded})`);
+                                comicBatch = []; // Kosongkan batch setelah disimpan
                             }
-                            console.log(`Saved ${pageNewComics} new comics to DB from page ${p}. (Total so far: ${totalNewComicsAdded})`);
                         } catch (pageErr) {
                             console.error(`[Warning] Error on page ${p} for ${adapter.sourceName}: ${pageErr.message}. Stopping pagination and proceeding to next phase.`);
                             break; // Stop fetching more pages, but continue to Phase 2
                         }
                         
                         await delay(1000); // Wait 1s between pages to avoid ban
+                    }
+                    
+                    // Simpan sisa komik yang belum mencapai 5 halaman
+                    if (comicBatch.length > 0) {
+                        const dataToInsert = comicBatch.map(c => ({
+                            sourceId: c.sourceId,
+                            title: c.title,
+                            coverUrl: c.coverUrl,
+                            sourceName: adapter.sourceName
+                        }));
+                        const result = await prisma.comic.createMany({
+                            data: dataToInsert,
+                            skipDuplicates: true
+                        });
+                        totalNewComicsAdded += result.count;
+                        console.log(`Sisa Batch tersimpan! ${result.count} komik baru ditambahkan. (Total: ${totalNewComicsAdded})`);
                     }
                 }
             } catch (err) {
