@@ -20,8 +20,8 @@ export default class MangaDexAdapter extends ComicSource {
         // We'll just fetch the latest updated comics.
         // Pagination is offset = (page-1)*10.
         try {
-            const offset = (page - 1) * 10;
-            let url = `${this.baseUrl}/manga?includes[]=cover_art&hasAvailableChapters=true&availableTranslatedLanguage[]=en&limit=10&offset=${offset}&order[updatedAt]=desc`;
+            const offset = (page - 1) * 50;
+            let url = `${this.baseUrl}/manga?includes[]=cover_art&hasAvailableChapters=true&availableTranslatedLanguage[]=en&limit=50&offset=${offset}&order[updatedAt]=desc`;
 
             const res = await axios.get(url, {
                 headers: { 'User-Agent': 'PanelSync-App/1.0 (Mozilla/5.0)' },

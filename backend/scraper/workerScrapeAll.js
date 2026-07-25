@@ -23,7 +23,14 @@ async function runWorker() {
             let latestComics = [];
             try {
                 if (typeof adapter.getBrowse === 'function') {
-                    latestComics = await adapter.getBrowse(1);
+                    // Loop 10 pages to get a lot of comics (almost unlimited for daily updates)
+                    for (let p = 1; p <= 10; p++) {
+                        console.log(`Fetching page ${p} for ${adapter.sourceName}...`);
+                        const pageComics = await adapter.getBrowse(p);
+                        if (!pageComics || pageComics.length === 0) break;
+                        latestComics = latestComics.concat(pageComics);
+                        await delay(1000); // Wait 1s between pages to avoid ban
+                    }
                 }
             } catch (err) {
                 console.error(`Failed to fetch latest comics from ${adapter.sourceName}:`, err.message);

@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { fork } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import comicsRouter from './routes/comics.js';
 import authRouter from './routes/auth.js';
 import bookmarksRouter from './routes/bookmarks.js';
@@ -39,3 +42,21 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// Auto Sync Scheduler (Run every 6 hours)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const SYNC_INTERVAL = 6 * 60 * 60 * 1000;
+
+setInterval(() => {
+    console.log('[Scheduler] Starting auto-sync...');
+    const workerPath = path.join(__dirname, 'scraper', 'workerScrapeAll.js');
+    fork(workerPath);
+}, SYNC_INTERVAL);
+
+// Optional: Run it once on startup after 10 seconds
+setTimeout(() => {
+    console.log('[Scheduler] Running initial startup sync...');
+    const workerPath = path.join(__dirname, 'scraper', 'workerScrapeAll.js');
+    fork(workerPath);
+}, 10000);
