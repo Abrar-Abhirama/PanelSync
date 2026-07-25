@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from './prismaClient.js';
 
 async function resetComics() {
     console.log("Menghapus semua data dari database (kecuali akun User/Admin)...");
