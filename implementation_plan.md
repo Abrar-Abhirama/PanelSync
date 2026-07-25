@@ -8,7 +8,7 @@ As requested, the database will store **image URLs**, not the physical image fil
 - **Frontend**: React / Next.js + TypeScript
 - **Backend API**: Node.js + Express (JavaScript)
 - **Database**: PostgreSQL (using Prisma or Sequelize as ORM)
-- **Scraper System**: Python (with ecosystem tools like Celery for queueing, depending on future choices)
+- **Scraper System**: Node.js / TypeScript (Using Playwright and Cheerio)
 - **Cache**: Redis
 - **Deployment**: Docker
 
@@ -17,10 +17,8 @@ As requested, the database will store **image URLs**, not the physical image fil
 > [!IMPORTANT]
 > The plan has been updated to switch the backend from Java (Spring Boot) to **Node.js (Express) using JavaScript**. This allows us to use `package.json` for dependency management as requested. Please review the updated technology stack and Phase 1 plan.
 
-## Open Questions
-
-> [!WARNING]
-> 1. **Initial Scraping Target**: Which specific comic website do you want to use as the first scraping target (Source A) in Phase 2?
+> [!IMPORTANT]
+> The target for the first scraper has been set to **Asura Scans**. We have also switched the scraper language from Python to **Node.js / TypeScript** to allow us to reuse the existing Prisma Database Client and keep the entire project in a single language. We will use `playwright` to bypass Cloudflare.
 
 ## Proposed Implementation Phases
 
@@ -57,53 +55,72 @@ Create a simple web interface to read comics consuming the APIs built above.
 
 Decoupling the scraping system from the main backend API using Python.
 
-**1. First Scraper (Python)**
-- Build the scraper architecture with a single comic *source*.
-- Implement a *Parser* to fetch the list of comics, chapters, and extract *image URLs*.
-- Save the scraped data directly to the PostgreSQL database.
+**1. First Scraper (Node.js - Target: Asura Scans)**
+- Build the scraper architecture inside a new `scraper` directory using Node.js.
+- Use `playwright` to bypass Asura Scans' Cloudflare protection and `cheerio` to parse the HTML.
+- Reuse the existing Prisma Client to save the scraped data directly to the PostgreSQL database.
 
-**2. Source Abstraction & Adapter**
-- Implement an abstract interface (`ComicSource`) in Python.
-- Create specific adapters for each *source* to produce a standardized data structure.
-- Add a second *source* (Source B) to test the adapter system.
+**2. Source Abstraction & Adapter (The Scraper Interface)**
+To prevent our code from breaking when a website changes, and to allow us to easily add 50 different comic websites, we will use Object-Oriented Abstraction.
+- Create an abstract `ComicSource` interface in TypeScript:
+  - `getBrowse(page)`: Returns a standardized array of comics.
+  - `getDetails(comicUrl)`: Returns the description and chapter list.
+  - `getPages(chapterUrl)`: Returns the array of image URLs.
+- The main system will only ever talk to `ComicSource`. 
+- We will build an `AsuraAdapter` that *implements* `ComicSource`. If Asura changes their HTML, only the `AsuraAdapter` breaks, while the rest of the app (and other sources) keep running perfectly.
 
----
+### Phase 3: Premium Frontend & Reader Overhaul (Current Priority)
 
-### Phase 3: Asynchronous Processing (Milestones 5 & 6)
+The backend scraper works flawlessly, so our immediate priority is completely overhauling the Next.js frontend. Currently, it is functional but lacks the high-end aesthetic required for modern web apps. We need to implement a stunning UI that feels premium and state-of-the-art.
 
-Enhancing the scraping system's reliability so it doesn't overload the server and handles errors gracefully.
+**1. Global Aesthetic Upgrade**
+- Upgrade `globals.css` with a premium dark-mode color palette (deep zincs and vibrant purples).
+- Add modern typography (e.g., Inter or Outfit via Next/Font).
+- Implement glassmorphism effects and smooth hover micro-animations across all comic cards.
 
-**1. Queue & Background Worker**
-- Use Redis + a task queue (e.g., Celery) to manage *Scraping Jobs*.
-- Build a dedicated Worker that consumes jobs from the queue, executes the scraping, and saves to the database.
+**2. The Reader Experience (Bug Fixes & UI)**
+- Fix any broken image layouts on the Reader page (ensure 100% responsive width).
+- Build a sticky top-bar and bottom-bar for the Reader with "Previous Chapter" and "Next Chapter" navigation logic.
+- Add a floating "Back to Details" button so you aren't trapped in the reader.
 
-**2. Resiliency Features**
-- Implement a *Retry Mechanism* with *Exponential Backoff*.
-- Add *Rate Limiting* to respect the source servers.
-- Add *Validation* (ensure pages are not empty) and *Anomaly Detection* (prevent mass deletion if a source goes down).
+**3. Home & Details Page Polish**
+- Ensure the comic grid (`page.tsx`) uses staggered CSS animations for a "wow" effect on load.
+- Enhance the Details page (`[id]/page.tsx`) with a blurred background banner matching the comic cover.
 
----
+## User Review Required
 
-### Phase 4: Optimization & Production-Readiness (Milestones 7 & 8)
+> [!IMPORTANT]
+> Since the core data pipeline is working, we are shifting our priority from Backend to Frontend UI/UX. Please review the new Phase 3 plan above. Do these aesthetic priorities align with what you want to fix? Are there any specific bugs in the Reader you want me to focus on first?
 
-Adding the performance, search, and observability layers.
+### Phase 5: User Login, Bookmarks & Paywall
 
-**1. Caching & Search**
-- Implement Redis Cache for frequently accessed endpoints (e.g., popular comic details).
-- Utilize PostgreSQL Full-Text Search for the comic search feature.
+**Goal**: Allow users to create accounts, log in, bookmark comics, and restrict non-logged in users to reading exactly 1 chapter.
 
-**2. Observability & Deployment**
-- Add centralized Logging and Metrics (e.g., *success rate*, *scraping duration*).
-- Set up Docker containerization for all components (Frontend, API, Python Worker, Redis, PostgreSQL).
-- (Optional) Set up a CI/CD pipeline (e.g., GitHub Actions).
+**1. Backend Auth & Database (Prisma + Express)**
+- Add `password` to the `User` model in `schema.prisma`.
+- Install `bcrypt` for password hashing and `jsonwebtoken` (JWT) for secure authentication.
+- Create `/api/auth/register` and `/api/auth/login` endpoints that return a JWT token.
+- Create `POST /api/bookmarks` and `GET /api/bookmarks` to manage user bookmarks (protected by a JWT auth middleware).
 
-## Verification Plan
+**2. Frontend Authentication State**
+- Create a global `AuthContext` in Next.js to keep track of whether the user is logged in.
+- Build a beautiful, animated **Login / Register Modal** that can pop up over any page.
+- Update the Header to show "Login" or the User's Name / Logout button.
 
-### Automated Tests
-- **Backend API (Node.js)**: Unit testing for each endpoint using Jest or Mocha/Chai.
-- **Scraper (Python)**: Create *HTML Fixtures* to ensure the parser can extract data from static HTML, which will *fail* if the source HTML structure changes.
+**3. The 1-Chapter Paywall (Cookies)**
+- When a user opens a Chapter, we will check if they are logged in via the `AuthContext`.
+- If they are NOT logged in, we will check their browser Cookies (using a library like `js-cookie`) for a `free_chapter_read` cookie.
+- If the cookie doesn't exist, we let them read and set the cookie to `true` (expiring in 30 days or never).
+- If the cookie *does* exist, instead of showing the comic images, we will blur the screen and pop up the **Login Modal**, forcing them to create an account or log in to continue reading!
 
-### Manual Verification
-- Run a trial scrape on a single comic.
-- Open the Frontend Reader and verify that the image pages load smoothly using the `image_url` stored in the database.
-- Ensure chapter transitions and *reading progress* are saved correctly to the database.
+**4. Bookmarks UI**
+- Add a "Bookmark" button to the Comic Details page.
+- Create a dedicated `/bookmarks` page for logged-in users to see their saved comics.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The plan for Phase 5 has been written out above! 
+> I will use browser Cookies to track the non-logged in users just as you suggested, which is the perfect approach for a paywall.
+> 
+> **Does this plan look good to you? If so, hit Proceed!**

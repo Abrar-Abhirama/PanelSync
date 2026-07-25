@@ -9,6 +9,7 @@ datasource db {
 model User {
   id               Int                @id @default(autoincrement())
   username         String             @unique
+  password         String
   createdAt        DateTime           @default(now())
   readingProgress  ReadingProgress[]
   bookmarks        Bookmark[]
@@ -20,7 +21,12 @@ model Comic {
   title            String
   description      String?            @db.Text
   coverUrl         String?            @db.Text
-  sourceId         String?
+  sourceId         String?            @unique
+  author           String?
+  rating           Float?
+  genres           String[]
+  releaseDate      String?
+  sourceName       String?
   createdAt        DateTime           @default(now())
   chapters         Chapter[]
   readingProgress  ReadingProgress[]
@@ -34,6 +40,8 @@ model Chapter {
   comic            Comic              @relation(fields: [comicId], references: [id], onDelete: Cascade)
   title            String?
   chapterNumber    Float
+  sourceId         String?            @unique
+  sourceUrl        String?            @db.Text
   createdAt        DateTime           @default(now())
   pages            Page[]
   readingProgress  ReadingProgress[]

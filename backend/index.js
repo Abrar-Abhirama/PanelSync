@@ -1,7 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import comicRoutes from './routes/comics.js'; // Import our new routes
+import comicsRouter from './routes/comics.js';
+import authRouter from './routes/auth.js';
+import bookmarksRouter from './routes/bookmarks.js';
+import userRouter from './routes/user.js';
+import proxyRoutes from './routes/proxy.js'; // Import proxy
 
 dotenv.config();
 
@@ -13,7 +17,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/comics', comicRoutes);
+app.use('/api/comics', comicsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/bookmarks', bookmarksRouter);
+app.use('/api/user', userRouter);
+app.use('/api/proxy', proxyRoutes); // Mount proxy
 
 // Basic health check route
 app.get('/api/health', (req, res) => {
