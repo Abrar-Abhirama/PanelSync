@@ -287,7 +287,7 @@ function HomeContent() {
                   </h2>
                   <div className="flex justify-between items-center mt-auto">
                     <p className="text-sm text-gray-400 font-medium line-clamp-1">
-                      {comic._count?.chapters ? `${comic._count.chapters} Chapters` : 'Updated recently'}
+                      {comic._count?.chapters ? `${comic._count.chapters} Chapters` : 'Tap to fetch chapters'}
                     </p>
                     <button 
                       onClick={(e) => toggleBookmark(e, comic.id)}
