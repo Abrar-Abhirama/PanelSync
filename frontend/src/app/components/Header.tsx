@@ -18,14 +18,17 @@ export default function Header() {
   const pathname = usePathname();
   const isChapterPage = pathname.includes('/chapter/');
   const [comicCover, setComicCover] = useState<string | null>(null);
+  const [dynamicGenres, setDynamicGenres] = useState<string[]>([]);
 
-  const GENRES = [
-    'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Harem', 
-    'Historical', 'Horror', 'Isekai', 'Magic', 'Martial Arts', 
-    'Mecha', 'Mystery', 'Psychological', 'Regression', 'Reincarnation', 
-    'Romance', 'School Life', 'Sci-Fi', 'Seinen', 'Shoujo', 'Shounen', 
-    'Slice of Life', 'Sports', 'Supernatural', 'System', 'Thriller', 'Tragedy'
-  ];
+  // Fetch unique genres from backend
+  useEffect(() => {
+    fetch('/api/comics/genres/list')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setDynamicGenres(data);
+      })
+      .catch(console.error);
+  }, []);
 
   // Fetch comic cover for the reader header
   useEffect(() => {
@@ -140,9 +143,12 @@ export default function Header() {
                     <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)}></div>
                     <div className="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 z-50 max-h-80 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-emerald-500/50 [&::-webkit-scrollbar-track]:bg-transparent">
                       <div className="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-white/5 mb-1 sticky top-0 bg-[#0a0a0c]/95 backdrop-blur-xl">
-                        Genres
+                        Genres {dynamicGenres.length > 0 && `(${dynamicGenres.length})`}
                       </div>
-                      {GENRES.map(genre => (
+                      {dynamicGenres.length === 0 && (
+                         <div className="px-4 py-2 text-xs text-gray-500 italic">Loading...</div>
+                      )}
+                      {dynamicGenres.map(genre => (
                         <button
                           key={genre}
                           onClick={() => {

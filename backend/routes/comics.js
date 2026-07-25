@@ -58,6 +58,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+// 1.5 Get all unique genres dynamically
+router.get('/genres/list', async (req, res) => {
+  try {
+    // We use a raw SQL query to unnest the string arrays and get distinct values
+    const result = await prisma.$queryRaw`SELECT DISTINCT unnest(genres) as genre FROM "Comic" ORDER BY genre ASC;`;
+    const genres = result.map(r => r.genre).filter(Boolean);
+    res.json(genres);
+  } catch (error) {
+    console.error('[Genres] Error fetching dynamic genres:', error);
+    res.status(500).json({ error: 'Failed to fetch genres' });
+  }
+});
+
 // 2. Get a single comic with its chapters
 router.get('/:id', async (req, res) => {
   try {
