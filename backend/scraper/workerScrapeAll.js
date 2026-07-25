@@ -23,8 +23,8 @@ async function runWorker() {
             let latestComics = [];
             try {
                 if (typeof adapter.getBrowse === 'function') {
-                    // Loop 10 pages to get a lot of comics (almost unlimited for daily updates)
-                    for (let p = 1; p <= 10; p++) {
+                    // Fetch until the page is empty (unlimited)
+                    for (let p = 1; ; p++) {
                         console.log(`Fetching page ${p} for ${adapter.sourceName}...`);
                         const pageComics = await adapter.getBrowse(p);
                         if (!pageComics || pageComics.length === 0) break;
@@ -79,8 +79,8 @@ async function runWorker() {
                     let details = null;
                     let chapters = [];
 
-                    if (adapter.sourceName === 'AsuraScans') {
-                        const url = `https://asurascans.com/comics/${comic.sourceId.replace('asura-', '')}`;
+                    if (adapter.sourceName === 'Asura Scans') {
+                        const url = `https://asurascans.com/series/${comic.sourceId.replace('asura-', '')}`;
                         details = await adapter.getDetails(url);
                         chapters = details.chapters || [];
                     } else if (adapter.sourceName === 'MangaDex') {
