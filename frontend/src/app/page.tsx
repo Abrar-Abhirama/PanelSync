@@ -158,7 +158,7 @@ function HomeContent() {
                 className="snap-start shrink-0 w-[300px] group flex gap-4 bg-white/5 border border-white/5 hover:border-emerald-500/30 hover:bg-white/10 rounded-xl p-3 transition-all hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 items-center"
               >
                 <div className="w-16 h-20 shrink-0 rounded-lg overflow-hidden shadow-lg">
-                  <img src={progress.comic.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={`/api/proxy?url=${encodeURIComponent(progress.comic.coverUrl)}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <h3 className="font-bold text-white text-sm truncate group-hover:text-emerald-400 transition-colors">
@@ -245,7 +245,7 @@ function HomeContent() {
                 {/* Comic Cover with Glassmorphism Overlay */}
                 <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 transition-all duration-300 group-hover:ring-emerald-500/50 group-hover:shadow-emerald-500/20 group-hover:-translate-y-2">
                   <img 
-                    src={comic.coverUrl} 
+                    src={`/api/proxy?url=${encodeURIComponent(comic.coverUrl)}`}
                     alt={comic.title}
                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                   />

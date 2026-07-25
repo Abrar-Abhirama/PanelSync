@@ -115,7 +115,7 @@ export default function ComicDetail() {
       <div className="absolute top-0 left-0 w-full h-[60vh] overflow-hidden -z-10 pointer-events-none">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-20 blur-[100px] scale-150"
-          style={{ backgroundImage: `url(${comic.coverUrl})` }}
+          style={{ backgroundImage: `url(/api/proxy?url=${encodeURIComponent(comic.coverUrl)})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/80 to-transparent" />
       </div>
@@ -129,7 +129,7 @@ export default function ComicDetail() {
           <div className="w-full md:w-[280px] shrink-0">
             <div className="aspect-[2/3] relative rounded-xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] ring-1 ring-white/20">
               <img 
-                src={comic.coverUrl} 
+                src={`/api/proxy?url=${encodeURIComponent(comic.coverUrl)}`}
                 alt={comic.title}
                 className="object-cover w-full h-full"
               />

@@ -105,7 +105,7 @@ export default function BookmarksPage() {
                 {/* Comic Cover with Glassmorphism Overlay */}
                 <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 transition-all duration-300 group-hover:ring-emerald-500/50 group-hover:shadow-emerald-500/20 group-hover:-translate-y-2">
                   <img 
-                    src={comic.coverUrl} 
+                    src={`/api/proxy?url=${encodeURIComponent(comic.coverUrl)}`}
                     alt={comic.title}
                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                   />
