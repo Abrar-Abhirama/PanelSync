@@ -46,7 +46,7 @@ export default class MangaDexAdapter extends ComicSource {
             return comics;
         } catch (error) {
             console.error(`[MangaDexAdapter] Error searching comics: ${error.message}`);
-            return [];
+            throw error; // Throw error so worker can catch it and handle retries
         }
     }
 
