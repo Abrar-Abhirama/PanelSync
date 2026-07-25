@@ -80,7 +80,7 @@ async function runWorker() {
                     let chapters = [];
 
                     if (adapter.sourceName === 'Asura Scans') {
-                        const url = `https://asurascans.com/series/${comic.sourceId.replace('asura-', '')}`;
+                        const url = `https://asurascans.com/comics/${comic.sourceId.replace('asura-', '')}`;
                         details = await adapter.getDetails(url);
                         chapters = details.chapters || [];
                     } else if (adapter.sourceName === 'MangaDex') {

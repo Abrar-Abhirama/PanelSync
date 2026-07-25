@@ -214,7 +214,7 @@ router.post('/:id/sync', async (req, res) => {
     try {
       let fetchedChapters = [];
       if (comic.sourceName === 'Asura Scans') {
-          const url = `https://asurascans.com/series/${comic.sourceId.replace('asura-', '')}`;
+          const url = `https://asurascans.com/comics/${comic.sourceId.replace('asura-', '')}`;
           const details = await adapter.getDetails(url);
           fetchedChapters = details.chapters || [];
       } else if (comic.sourceName === 'MangaDex') {
