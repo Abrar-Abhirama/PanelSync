@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
@@ -77,6 +77,21 @@ router.post('/scrape', (req, res) => {
     } catch (error) {
         console.error('Error starting scraper:', error);
         res.status(500).json({ error: 'Failed to start scraper' });
+    }
+});
+
+// Stop Scraper
+router.post('/scrape/stop', (req, res) => {
+    try {
+        if (process.platform === 'win32') {
+             execSync('wmic process where "commandline like \'%workerScrapeAll.js%\'" call terminate');
+        } else {
+             execSync('pkill -f workerScrapeAll.js');
+        }
+        res.json({ message: 'Scraping stopped successfully!' });
+    } catch (error) {
+        // If pkill fails, it usually means no process was found
+        res.json({ message: 'No active scraping process found.' });
     }
 });
 
