@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     
     // Determine the referer based on the image URL
     let referer = 'https://asurascans.com/';
-    if (imageUrl.includes('mangadex.org')) {
+    if (imageUrl.includes('mangadex.org') || imageUrl.includes('mangadex.network')) {
         referer = 'https://mangadex.org/';
     }
 
