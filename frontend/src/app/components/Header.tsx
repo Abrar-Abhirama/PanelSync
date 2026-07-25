@@ -91,7 +91,7 @@ export default function Header() {
         {/* Top Row on Mobile: Logo & Hamburger */}
         <div className="flex items-center justify-between w-full md:w-auto">
           <Link href="/" className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500">
-            PanelSync.
+            Comicly.
           </Link>
           
           {!isChapterPage && (

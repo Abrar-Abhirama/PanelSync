@@ -179,7 +179,7 @@ export default function AdminDashboard() {
           <h1 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500 mb-2">
             Admin Dashboard
           </h1>
-          <p className="text-gray-400">Manage the PanelSync engine and view platform statistics.</p>
+          <p className="text-gray-400">Manage the Comicly engine and view platform statistics.</p>
         </div>
 
         {/* Stats Grid */}
