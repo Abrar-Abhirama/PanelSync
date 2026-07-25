@@ -1,7 +1,11 @@
 import prisma from '../prismaClient.js';
 import AsuraAdapter from './AsuraAdapter.js';
+import MangaDexAdapter from './MangaDexAdapter.js';
 
-const adapter = new AsuraAdapter();
+const adapters = {
+    'AsuraScans': new AsuraAdapter(),
+    'MangaDex': new MangaDexAdapter()
+};
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -10,9 +14,10 @@ async function scrapePages() {
 
     while (true) {
         try {
-            // Find chapters that don't have any pages yet
+            // Find chapters that don't have any pages yet, also include the comic sourceName
             const chapters = await prisma.chapter.findMany({
                 where: { pages: { none: {} } },
+                include: { comic: true },
                 take: 10,
                 orderBy: { id: 'desc' }
             });
@@ -24,15 +29,24 @@ async function scrapePages() {
             }
 
             for (const chapter of chapters) {
-                if (!chapter.sourceUrl) {
+                if (!chapter.sourceUrl && chapter.comic.sourceName !== 'MangaDex') {
+                    // MangaDex doesn't need sourceUrl for pages, it uses chapter sourceId
                     console.log(`Chapter ${chapter.id} has no sourceUrl. Skipping...`);
                     continue;
                 }
 
-                console.log(`Scraping pages for chapter ID ${chapter.id} at ${chapter.sourceUrl}`);
+                console.log(`Scraping pages for chapter ID ${chapter.id} (Source: ${chapter.comic.sourceName})`);
 
                 try {
-                    const imageUrls = await adapter.getPages(chapter.sourceUrl);
+                    const adapter = adapters[chapter.comic.sourceName];
+                    if (!adapter) {
+                        console.error(`Unknown source: ${chapter.comic.sourceName}`);
+                        continue;
+                    }
+
+                    // Asura uses URL, MangaDex uses sourceId
+                    const target = chapter.comic.sourceName === 'MangaDex' ? chapter.sourceId : chapter.sourceUrl;
+                    const imageUrls = await adapter.getPages(target);
 
                     if (imageUrls && imageUrls.length > 0) {
                         let savedCount = 0;

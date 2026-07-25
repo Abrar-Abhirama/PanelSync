@@ -29,9 +29,9 @@ router.post('/register', async (req, res) => {
             }
         });
 
-        const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
 
-        res.json({ token, user: { id: user.id, username: user.username } });
+        res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ error: 'Failed to register user' });
@@ -57,9 +57,9 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
 
-        res.json({ token, user: { id: user.id, username: user.username } });
+        res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Failed to log in' });
@@ -79,7 +79,7 @@ router.get('/me', async (req, res) => {
 
         const user = await prisma.user.findUnique({
             where: { id: decoded.id },
-            select: { id: true, username: true, createdAt: true } // Omit password
+            select: { id: true, username: true, role: true, createdAt: true } // Omit password
         });
 
         if (!user) {

@@ -6,6 +6,7 @@ import authRouter from './routes/auth.js';
 import bookmarksRouter from './routes/bookmarks.js';
 import userRouter from './routes/user.js';
 import proxyRoutes from './routes/proxy.js'; // Import proxy
+import adminRouter from './routes/admin.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/bookmarks', bookmarksRouter);
 app.use('/api/user', userRouter);
 app.use('/api/proxy', proxyRoutes); // Mount proxy
+app.use('/api/admin', adminRouter);
 
 // Basic health check route
 app.get('/api/health', (req, res) => {

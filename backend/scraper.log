@@ -1,0 +1,21 @@
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+=== Starting Multi-Source Full-Library Scraper ===
+
+--- Initializing Adapter: Asura Scans ---
+Fetching latest comics from Asura Scans...
+[AsuraAdapter] Fetching: https://asurascans.com/browse?page=1
+Added 0 new comics from Asura Scans.
+Found 1 comics from Asura Scans needing chapters.
+
+[1/1] Scraping: 30 Years Since the Prologue
+No chapters found for this comic.
+
+--- Initializing Adapter: MangaDex ---
+Fetching latest comics from MangaDex...
+Added 0 new comics from MangaDex.
+Found 1 comics from MangaDex needing chapters.
+
+[1/1] Scraping: Sayonara Zetsubou Sensei
+No chapters found for this comic.
+
+=== Full-Library Scrape Complete! ===

@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from '../prismaClient.js';
 import AsuraAdapter from '../scraper/AsuraAdapter.js';
+import MangaDexAdapter from '../scraper/MangaDexAdapter.js';
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ router.get('/', async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const search = req.query.q || '';
     const genre = req.query.genre || '';
+    const source = req.query.source || '';
     
     const skip = (page - 1) * limit;
     
@@ -20,6 +22,10 @@ router.get('/', async (req, res) => {
     }
     if (genre) {
       whereClause.genres = { has: genre };
+    }
+    if (source) {
+      // e.g. "Asura Scans", "MangaDex"
+      whereClause.sourceName = source;
     }
 
     const [comics, totalCount] = await Promise.all([
@@ -82,6 +88,7 @@ router.get('/chapters/:chapterId', async (req, res) => {
     let chapter = await prisma.chapter.findUnique({
       where: { id: parseInt(chapterId) },
       include: {
+        comic: true,
         pages: {
           orderBy: { pageNumber: 'asc' } // Ensure pages are in correct reading order!
         }
@@ -95,9 +102,23 @@ router.get('/chapters/:chapterId', async (req, res) => {
     // ON-DEMAND SCRAPING: If pages are missing, fetch them instantly!
     if (chapter.pages.length === 0 && chapter.sourceUrl) {
       console.log(`[On-Demand] Scraping pages for chapter ${chapter.id} instantly...`);
-      const adapter = new AsuraAdapter();
-      try {
-        const imageUrls = await adapter.getPages(chapter.sourceUrl);
+      
+      let adapter;
+      if (chapter.comic.sourceName === 'Asura Scans') {
+          adapter = new AsuraAdapter();
+      } else if (chapter.comic.sourceName === 'MangaDex') {
+          adapter = new MangaDexAdapter();
+      }
+
+      if (adapter) {
+        try {
+          let imageUrls = [];
+          if (chapter.comic.sourceName === 'Asura Scans') {
+              imageUrls = await adapter.getPages(chapter.sourceUrl);
+          } else if (chapter.comic.sourceName === 'MangaDex') {
+              imageUrls = await adapter.getPages(chapter.sourceId);
+          }
+          
         if (imageUrls && imageUrls.length > 0) {
           for (let i = 0; i < imageUrls.length; i++) {
               await prisma.page.create({
@@ -120,10 +141,11 @@ router.get('/chapters/:chapterId', async (req, res) => {
             }
           });
         }
-      } catch (err) {
-        console.error(`[On-Demand] Failed to scrape pages:`, err.message);
-      } finally {
-        await adapter.close(); // Make sure to close the hidden browser!
+          } catch (err) {
+            console.error(`[On-Demand] Failed to scrape pages:`, err.message);
+          } finally {
+            if (adapter.close) await adapter.close(); // Make sure to close the hidden browser if any
+          }
       }
     }
 
@@ -164,14 +186,31 @@ router.post('/:id/sync', async (req, res) => {
     }
 
     console.log(`[Ghost Sync] Checking for new chapters for ${comic.title}...`);
-    const adapter = new AsuraAdapter();
+    
+    let adapter;
+    if (comic.sourceName === 'Asura Scans') {
+        adapter = new AsuraAdapter();
+    } else if (comic.sourceName === 'MangaDex') {
+        adapter = new MangaDexAdapter();
+    }
+
+    if (!adapter) {
+        return res.status(400).json({ error: 'Unsupported source for ghost sync' });
+    }
+
     try {
-      const url = `https://asurascans.com/comics/${comic.sourceId.replace('asura-', '')}`;
-      const details = await adapter.getDetails(url);
+      let fetchedChapters = [];
+      if (comic.sourceName === 'Asura Scans') {
+          const url = `https://asurascans.com/comics/${comic.sourceId.replace('asura-', '')}`;
+          const details = await adapter.getDetails(url);
+          fetchedChapters = details.chapters || [];
+      } else if (comic.sourceName === 'MangaDex') {
+          fetchedChapters = await adapter.getChapters(comic.sourceId);
+      }
       
-      if (details.chapters && details.chapters.length > 0) {
+      if (fetchedChapters && fetchedChapters.length > 0) {
         let newChaptersAdded = 0;
-        const reversedChapters = [...details.chapters].reverse();
+        const reversedChapters = [...fetchedChapters].reverse();
         
         for (const ch of reversedChapters) {
             // Check if we already have it
@@ -207,10 +246,9 @@ router.post('/:id/sync', async (req, res) => {
            return res.json({ updated: false });
         }
       }
-      
       return res.json({ updated: false });
     } finally {
-      await adapter.close();
+      if (adapter.close) await adapter.close();
     }
   } catch (error) {
     console.error(`[Ghost Sync] Error syncing comic ${id}:`, error);

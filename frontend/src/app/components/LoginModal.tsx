@@ -48,8 +48,8 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
 
-        <h2 className="text-2xl font-black text-white mb-6 text-center">
-          Welcome Back
+        <h2 className="text-xl font-black text-white mb-6 text-center leading-tight">
+          Contact The Owner For The Account
         </h2>
 
         {error && (

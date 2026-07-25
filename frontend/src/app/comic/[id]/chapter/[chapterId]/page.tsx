@@ -13,9 +13,22 @@ export default function ChapterReadingPage() {
   const [allChapters, setAllChapters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showChapterList, setShowChapterList] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [imageWidth, setImageWidth] = useState('max-w-[720px]'); // Default
   const [showUI, setShowUI] = useState(true);
   const { user, token, isLoading: isAuthLoading, openLoginModal } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
+
+  // Load saved settings
+  useEffect(() => {
+    const savedWidth = localStorage.getItem('reader_image_width');
+    if (savedWidth) setImageWidth(savedWidth);
+  }, []);
+
+  const changeImageWidth = (width: string) => {
+    setImageWidth(width);
+    localStorage.setItem('reader_image_width', width);
+  };
 
   // Paywall Logic & Tracking Progress
   useEffect(() => {
@@ -93,7 +106,7 @@ export default function ChapterReadingPage() {
       onClick={() => setShowUI(!showUI)}
     >
       {/* Comic Pages Container */}
-      <div className="pt-24 pb-24 flex flex-col items-center w-full md:max-w-[720px] mx-auto bg-black shadow-2xl min-h-screen">
+      <div className={`pt-24 pb-24 flex flex-col items-center w-full mx-auto bg-black shadow-2xl min-h-screen transition-all duration-300 ${imageWidth}`}>
         {chapter.pages && chapter.pages.length > 0 ? (
           chapter.pages.map((page: any) => (
             <div key={page.id} className="w-full relative mb-1 bg-gray-900 min-h-[400px] flex items-center justify-center">
@@ -172,6 +185,14 @@ export default function ChapterReadingPage() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </div>
           )}
+          {/* Settings Button */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
+            className="flex items-center justify-center p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-emerald-400 transition-colors"
+            title="Reader Settings"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          </button>
         </div>
       </div>
 
@@ -215,6 +236,56 @@ export default function ChapterReadingPage() {
                   </Link>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex justify-center items-end sm:items-center p-4 cursor-default"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowSettings(false);
+          }}
+        >
+          <div 
+            className="bg-[#0a0a0c] border border-white/10 w-full max-w-sm rounded-2xl flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:fade-in duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+              <h3 className="font-bold text-lg text-emerald-400">Reader Settings</h3>
+              <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <div className="p-5 flex flex-col gap-6">
+              {/* Image Width Setting */}
+              <div>
+                <label className="text-sm font-bold text-gray-400 mb-3 block uppercase tracking-wider">Image Width</label>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => changeImageWidth('max-w-[500px]')}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${imageWidth === 'max-w-[500px]' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10'}`}
+                  >
+                    Narrow
+                  </button>
+                  <button 
+                    onClick={() => changeImageWidth('max-w-[720px]')}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${imageWidth === 'max-w-[720px]' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10'}`}
+                  >
+                    Medium
+                  </button>
+                  <button 
+                    onClick={() => changeImageWidth('w-full')}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${imageWidth === 'w-full' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10'}`}
+                  >
+                    Full
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

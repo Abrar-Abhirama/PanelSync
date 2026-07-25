@@ -11,17 +11,23 @@ router.get('/', async (req, res) => {
 
   try {
     console.log(`[Proxy] Fetching: ${imageUrl}`);
+    
+    // Determine the referer based on the image URL
+    let referer = 'https://asurascans.com/';
+    if (imageUrl.includes('mangadex.org')) {
+        referer = 'https://mangadex.org/';
+    }
+
     // We use the built-in Node fetch to grab the image
     const response = await fetch(imageUrl, {
       headers: {
-        // This is the magic! We trick Asura into thinking we are on their website
-        'Referer': 'https://asurascans.com/',
+        'Referer': referer,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     });
 
     if (!response.ok) {
-      throw new Error(`Asura rejected the proxy request with status: ${response.status}`);
+      throw new Error(`Target rejected the proxy request with status: ${response.status}`);
     }
     
     // Grab the Content-Type (e.g. image/webp) and tell our frontend what it is

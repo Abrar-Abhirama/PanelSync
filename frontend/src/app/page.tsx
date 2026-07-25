@@ -14,6 +14,7 @@ function HomeContent() {
   const currentPage = parseInt(searchParams.get('page') || '1');
   const searchQuery = searchParams.get('q') || '';
   const selectedGenre = searchParams.get('genre') || '';
+  const selectedSource = searchParams.get('source') || '';
 
   const [comics, setComics] = useState([]);
   const [meta, setMeta] = useState<any>(null);
@@ -28,6 +29,9 @@ function HomeContent() {
     if (selectedGenre) {
       url += `&genre=${encodeURIComponent(selectedGenre)}`;
     }
+    if (selectedSource) {
+      url += `&source=${encodeURIComponent(selectedSource)}`;
+    }
     
     fetch(url)
       .then((res) => res.json())
@@ -40,7 +44,7 @@ function HomeContent() {
         console.error('Failed to fetch comics', err);
         setLoading(false);
       });
-  }, [currentPage, searchQuery, selectedGenre]);
+  }, [currentPage, searchQuery, selectedGenre, selectedSource]);
 
   // Fetch user's bookmarks
   useEffect(() => {
@@ -191,6 +195,35 @@ function HomeContent() {
                 : "Read the newest chapters from your favorite series."}
           </p>
         </div>
+
+        {/* SOURCE FILTER */}
+        <div>
+          <select
+            className="bg-[#1a1a24] border border-white/10 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 outline-none appearance-none pr-8 cursor-pointer shadow-lg hover:border-emerald-500/50 transition-colors"
+            value={selectedSource}
+            onChange={(e) => {
+              const val = e.target.value;
+              const params = new URLSearchParams(searchParams.toString());
+              if (val) {
+                params.set('source', val);
+              } else {
+                params.delete('source');
+              }
+              params.set('page', '1'); // reset page
+              router.push(`/?${params.toString()}`);
+            }}
+            style={{
+              backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.5rem center',
+              backgroundSize: '1em 1em'
+            }}
+          >
+            <option value="">Select Source: All</option>
+            <option value="AsuraScans">Asura Scans</option>
+            <option value="MangaDex">MangaDex</option>
+          </select>
+        </div>
       </div>
 
 
@@ -216,6 +249,15 @@ function HomeContent() {
                     alt={comic.title}
                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                   />
+
+                  {/* Source Badge */}
+                  <div className={`absolute top-2 left-2 backdrop-blur-md px-2 py-1 rounded border shadow-lg z-10 text-[10px] font-bold tracking-wider uppercase ${
+                    comic.sourceName === 'MangaDex' 
+                      ? 'bg-orange-500/20 border-orange-500/50 text-orange-400' 
+                      : 'bg-red-500/20 border-red-500/50 text-red-400'
+                  }`}>
+                    {comic.sourceName || 'AsuraScans'}
+                  </div>
 
                   {/* Bookmark Badge (Persistent if bookmarked) */}
                   {bookmarkedIds.has(comic.id) && (
