@@ -29,6 +29,8 @@ async function runWorker() {
             try {
                 if (typeof adapter.getBrowse === 'function') {
                     let comicBatch = [];
+                    let consecutiveErrors = 0;
+                    
                     // Fetch until the page is empty (unlimited)
                     for (let p = 1; ; p++) {
                         console.log(`Fetching page ${p} for ${adapter.sourceName}...`);
@@ -37,6 +39,7 @@ async function runWorker() {
                             const pageComics = await adapter.getBrowse(p);
                             if (!pageComics || pageComics.length === 0) break;
                             
+                            consecutiveErrors = 0; // Reset error count on success
                             comicBatch = comicBatch.concat(pageComics);
                             
                             // Save ke DB secara BATCH setiap 5 halaman (sekitar 100-250 komik sekaligus)
@@ -58,8 +61,16 @@ async function runWorker() {
                                 comicBatch = []; // Kosongkan batch setelah disimpan
                             }
                         } catch (pageErr) {
-                            console.error(`[Warning] Error on page ${p} for ${adapter.sourceName}: ${pageErr.message}. Stopping pagination and proceeding to next phase.`);
-                            break; // Stop fetching more pages, but continue to Phase 2
+                            consecutiveErrors++;
+                            console.error(`[Warning] Error on page ${p} for ${adapter.sourceName}: ${pageErr.message}. (Gagal beruntun: ${consecutiveErrors})`);
+                            
+                            if (consecutiveErrors >= 10) {
+                                console.error(`[Error] Terlalu banyak error beruntun (10 kali). Menghentikan penarikan halaman untuk sumber ini.`);
+                                break;
+                            }
+                            
+                            await delay(2000); // Tunggu agak lama sebelum mencoba halaman berikutnya
+                            continue; // Jangan berhenti, lanjut ke halaman berikutnya (biarin aja)
                         }
                         
                         await delay(1000); // Wait 1s between pages to avoid ban
