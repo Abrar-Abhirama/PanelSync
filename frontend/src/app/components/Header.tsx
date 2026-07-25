@@ -19,6 +19,14 @@ export default function Header() {
   const isChapterPage = pathname.includes('/chapter/');
   const [comicCover, setComicCover] = useState<string | null>(null);
 
+  const GENRES = [
+    'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Harem', 
+    'Historical', 'Horror', 'Isekai', 'Magic', 'Martial Arts', 
+    'Mecha', 'Mystery', 'Psychological', 'Regression', 'Reincarnation', 
+    'Romance', 'School Life', 'Sci-Fi', 'Seinen', 'Shoujo', 'Shounen', 
+    'Slice of Life', 'Sports', 'Supernatural', 'System', 'Thriller', 'Tragedy'
+  ];
+
   // Fetch comic cover for the reader header
   useEffect(() => {
     if (isChapterPage) {
@@ -130,11 +138,11 @@ export default function Header() {
                 {isFilterOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)}></div>
-                    <div className="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 z-50">
-                      <div className="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-white/5 mb-1">
+                    <div className="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 z-50 max-h-80 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-emerald-500/50 [&::-webkit-scrollbar-track]:bg-transparent">
+                      <div className="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-white/5 mb-1 sticky top-0 bg-[#0a0a0c]/95 backdrop-blur-xl">
                         Genres
                       </div>
-                      {['Action', 'Fantasy', 'Adventure', 'Regression', 'Reincarnation', 'System', 'Martial Arts'].map(genre => (
+                      {GENRES.map(genre => (
                         <button
                           key={genre}
                           onClick={() => {
