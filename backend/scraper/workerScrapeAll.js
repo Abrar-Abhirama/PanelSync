@@ -25,15 +25,44 @@ async function runWorker() {
 
             // Step 1: Fetch latest comics from this adapter and add them to DB if they don't exist
             console.log(`Fetching latest comics from ${adapter.sourceName}...`);
-            let latestComics = [];
+            let totalNewComicsAdded = 0;
             try {
                 if (typeof adapter.getBrowse === 'function') {
                     // Fetch until the page is empty (unlimited)
                     for (let p = 1; ; p++) {
                         console.log(`Fetching page ${p} for ${adapter.sourceName}...`);
-                        const pageComics = await adapter.getBrowse(p);
-                        if (!pageComics || pageComics.length === 0) break;
-                        latestComics = latestComics.concat(pageComics);
+                        
+                        try {
+                            const pageComics = await adapter.getBrowse(p);
+                            if (!pageComics || pageComics.length === 0) break;
+                            
+                            // Save to DB immediately per page
+                            let pageNewComics = 0;
+                            for (const c of pageComics) {
+                                try {
+                                    const existing = await prisma.comic.findUnique({ where: { sourceId: c.sourceId } });
+                                    if (!existing) {
+                                        await prisma.comic.create({
+                                            data: {
+                                                sourceId: c.sourceId,
+                                                title: c.title,
+                                                coverUrl: c.coverUrl,
+                                                sourceName: adapter.sourceName
+                                            }
+                                        });
+                                        pageNewComics++;
+                                        totalNewComicsAdded++;
+                                    }
+                                } catch (e) {
+                                    // Ignore unique constraint errors
+                                }
+                            }
+                            console.log(`Saved ${pageNewComics} new comics to DB from page ${p}. (Total so far: ${totalNewComicsAdded})`);
+                        } catch (pageErr) {
+                            console.error(`[Warning] Error on page ${p} for ${adapter.sourceName}: ${pageErr.message}. Stopping pagination and proceeding to next phase.`);
+                            break; // Stop fetching more pages, but continue to Phase 2
+                        }
+                        
                         await delay(1000); // Wait 1s between pages to avoid ban
                     }
                 }
@@ -41,40 +70,20 @@ async function runWorker() {
                 console.error(`Failed to fetch latest comics from ${adapter.sourceName}:`, err.message);
             }
 
-            let newComicsAdded = 0;
-            for (const c of latestComics) {
-                try {
-                    // sourceId must be unique globally. To prevent collisions between sources,
-                    // we can prefix mangadex sourceIds if needed, but they are UUIDs so it's fine.
-                    // Asura uses strings like 'asura-slug'.
-                    const existing = await prisma.comic.findUnique({ where: { sourceId: c.sourceId } });
-                    if (!existing) {
-                        await prisma.comic.create({
-                            data: {
-                                sourceId: c.sourceId,
-                                title: c.title,
-                                coverUrl: c.coverUrl,
-                                sourceName: adapter.sourceName
-                            }
-                        });
-                        newComicsAdded++;
-                    }
-                } catch (e) {
-                    // Ignore unique constraint errors
-                }
-            }
-            console.log(`Added ${newComicsAdded} new comics from ${adapter.sourceName}.`);
+            console.log(`Finished fetching browse pages. Total new comics added: ${totalNewComicsAdded} from ${adapter.sourceName}.`);
 
-            // Step 2: Find all comics for THIS source that have 0 chapters and scrape their details/chapters
+            // Step 2: Find comics for THIS source that have 0 chapters and scrape their details/chapters
+            // We limit to 50 comics per run (Batch) so it doesn't take hours and hours to finish
             const comicsToScrape = await prisma.comic.findMany({
                 where: {
                     sourceName: adapter.sourceName,
                     chapters: { none: {} }
                 },
-                orderBy: { id: 'asc' }
+                orderBy: { id: 'asc' },
+                take: 50 // BATCH LIMIT
             });
             
-            console.log(`Found ${comicsToScrape.length} comics from ${adapter.sourceName} needing chapters.`);
+            console.log(`Found ${comicsToScrape.length} comics from ${adapter.sourceName} needing chapters in this batch.`);
             
             for (let i = 0; i < comicsToScrape.length; i++) {
                 const comic = comicsToScrape[i];
