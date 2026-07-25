@@ -46,7 +46,7 @@ export default function ChapterReadingPage() {
       
       // TRACK PROGRESS IN BACKGROUND
       if (token && params.id && params.chapterId) {
-        fetch(`http://localhost:5000/api/user/read/${params.id}/${params.chapterId}`, {
+        fetch(`/api/user/read/${params.id}/${params.chapterId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export default function ChapterReadingPage() {
   useEffect(() => {
     if (!params.chapterId) return;
     // Fetch the specific chapter and all its pages from the backend
-    fetch(`http://localhost:5000/api/comics/chapters/${params.chapterId}`)
+    fetch(`/api/comics/chapters/${params.chapterId}`)
       .then((res) => res.json())
       .then((data) => {
         setChapter(data);
@@ -72,7 +72,7 @@ export default function ChapterReadingPage() {
       });
 
     // Fetch the full comic to get the list of all chapters for our popup
-    fetch(`http://localhost:5000/api/comics/${params.id}`)
+    fetch(`/api/comics/${params.id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.chapters) {
@@ -115,7 +115,7 @@ export default function ChapterReadingPage() {
               
               {/* The Actual Comic Page Image */}
               <img 
-                src={`http://localhost:5000/api/proxy?url=${encodeURIComponent(page.imageUrl)}`} 
+                src={`/api/proxy?url=${encodeURIComponent(page.imageUrl)}`} 
                 alt={`Page ${page.pageNumber}`}
                 className="w-full h-auto relative z-10"
                 loading="lazy" // Helps performance by only loading images as you scroll to them

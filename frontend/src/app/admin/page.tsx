@@ -29,7 +29,7 @@ export default function AdminDashboard() {
     }
 
     if (token) {
-      fetch('http://localhost:5000/api/admin/stats', {
+      fetch('/api/admin/stats', {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
       });
 
       // Fetch Users
-      fetch('http://localhost:5000/api/admin/users', {
+      fetch('/api/admin/users', {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -61,8 +61,8 @@ export default function AdminDashboard() {
   const handleSaveUser = async () => {
     try {
       const url = modalData.id 
-        ? `http://localhost:5000/api/admin/users/${modalData.id}` 
-        : 'http://localhost:5000/api/admin/users';
+        ? `/api/admin/users/${modalData.id}` 
+        : '/api/admin/users';
       
       const method = modalData.id ? 'PUT' : 'POST';
       
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
   const handleDeleteUser = async (id: number) => {
     if (!confirm('Are you sure you want to delete this user?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+      const res = await fetch(`/api/admin/users/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
     if (!token || user?.role !== 'ADMIN') return;
 
     const fetchLogs = () => {
-      fetch('http://localhost:5000/api/admin/logs', {
+      fetch('/api/admin/logs', {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
     setMessage('');
     
     try {
-      const res = await fetch('http://localhost:5000/api/admin/scrape', {
+      const res = await fetch('/api/admin/scrape', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });

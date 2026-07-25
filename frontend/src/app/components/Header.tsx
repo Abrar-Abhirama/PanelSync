@@ -23,7 +23,7 @@ export default function Header() {
     if (isChapterPage) {
       const match = pathname.match(/\/comic\/(\d+)\/chapter/);
       if (match && match[1]) {
-        fetch(`http://localhost:5000/api/comics/${match[1]}`)
+        fetch(`/api/comics/${match[1]}`)
           .then(res => res.json())
           .then(data => {
             if (data.coverUrl) setComicCover(data.coverUrl);

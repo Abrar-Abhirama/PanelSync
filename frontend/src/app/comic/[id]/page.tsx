@@ -16,14 +16,14 @@ export default function ComicDetail() {
   useEffect(() => {
     if (!params.id) return;
     
-    fetch(`http://localhost:5000/api/comics/${params.id}`)
+    fetch(`/api/comics/${params.id}`)
       .then((res) => res.json())
       .then((data) => {
         setComic(data);
         setLoading(false);
         
         // GHOST SYNC: Check for new chapters in the background
-        fetch(`http://localhost:5000/api/comics/${params.id}/sync`, { method: 'POST' })
+        fetch(`/api/comics/${params.id}/sync`, { method: 'POST' })
           .then(res => res.json())
           .then(syncData => {
             if (syncData.updated && syncData.chapters) {
@@ -40,7 +40,7 @@ export default function ComicDetail() {
 
     // Check if bookmarked
     if (user && token) {
-      fetch(`http://localhost:5000/api/bookmarks/check/${params.id}`, {
+      fetch(`/api/bookmarks/check/${params.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -48,7 +48,7 @@ export default function ComicDetail() {
       .catch(console.error);
 
       // Check reading progress
-      fetch(`http://localhost:5000/api/user/progress/${params.id}`, {
+      fetch(`/api/user/progress/${params.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -72,7 +72,7 @@ export default function ComicDetail() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/bookmarks/toggle', {
+      const res = await fetch('/api/bookmarks/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -18,7 +18,7 @@ export default function BookmarksPage() {
     }
 
     setLoading(true);
-    fetch(`http://localhost:5000/api/bookmarks`, {
+    fetch(`/api/bookmarks`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -41,7 +41,7 @@ export default function BookmarksPage() {
     if (!user || !token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/bookmarks/toggle', {
+      const res = await fetch('/api/bookmarks/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

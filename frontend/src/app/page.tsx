@@ -25,7 +25,7 @@ function HomeContent() {
   // Fetch comics
   useEffect(() => {
     setLoading(true);
-    let url = `http://localhost:5000/api/comics?page=${currentPage}&limit=20&q=${encodeURIComponent(searchQuery)}`;
+    let url = `/api/comics?page=${currentPage}&limit=20&q=${encodeURIComponent(searchQuery)}`;
     if (selectedGenre) {
       url += `&genre=${encodeURIComponent(selectedGenre)}`;
     }
@@ -50,7 +50,7 @@ function HomeContent() {
   useEffect(() => {
     if (user && token) {
       // Fetch bookmarks
-      fetch('http://localhost:5000/api/bookmarks', {
+      fetch('/api/bookmarks', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -61,7 +61,7 @@ function HomeContent() {
       .catch(console.error);
 
       // Fetch recent reads (Limit 15 for scrollable row)
-      fetch('http://localhost:5000/api/user/recent?limit=15', {
+      fetch('/api/user/recent?limit=15', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -85,7 +85,7 @@ function HomeContent() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/bookmarks/toggle', {
+      const res = await fetch('/api/bookmarks/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

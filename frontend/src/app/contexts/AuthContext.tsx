@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedToken) {
       setToken(storedToken);
       // Verify token
-      fetch('http://localhost:5000/api/auth/me', {
+      fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${storedToken}`
         }

@@ -20,7 +20,7 @@ export default function HistoryPage() {
     }
 
     if (token) {
-      fetch('http://localhost:5000/api/user/recent?limit=100', {
+      fetch('/api/user/recent?limit=100', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())
