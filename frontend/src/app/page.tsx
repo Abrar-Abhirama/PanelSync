@@ -220,7 +220,7 @@ function HomeContent() {
             }}
           >
             <option value="">Select Source: All</option>
-            <option value="AsuraScans">Asura Scans</option>
+            <option value="Asura Scans">Asura Scans</option>
             <option value="MangaDex">MangaDex</option>
           </select>
         </div>

@@ -8,8 +8,13 @@ async function delay(ms) {
 
 async function runWorker() {
     console.log("=== Starting Multi-Source Full-Library Scraper ===");
+    const targetSource = process.argv[2];
+    if (targetSource) console.log(`[Target Source]: ${targetSource}`);
     
-    const adapters = [new AsuraAdapter(), new MangaDexAdapter()];
+    const allAdapters = [new AsuraAdapter(), new MangaDexAdapter()];
+    const adapters = targetSource 
+        ? allAdapters.filter(a => a.sourceName === targetSource)
+        : allAdapters;
 
     try {
         for (const adapter of adapters) {

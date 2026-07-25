@@ -58,14 +58,21 @@ router.get('/stats', async (req, res) => {
 // Trigger Scraper
 router.post('/scrape', (req, res) => {
     try {
+        const { source } = req.body;
         // We use spawn to run the scraper in the background without blocking the API response
         const scriptPath = path.resolve('scraper/workerScrapeAll.js');
         const logPath = path.resolve('scraper.log');
         
         // Open file in write mode to overwrite old logs
-        const logStream = fs.openSync(logPath, 'w');
+        fs.writeFileSync(logPath, '');
+        const logStream = fs.openSync(logPath, 'a');
+
+        const args = [scriptPath];
+        if (source) {
+            args.push(source);
+        }
         
-        const child = spawn('node', [scriptPath], {
+        const child = spawn('node', args, {
             detached: true,
             stdio: ['ignore', logStream, logStream] // Pipe stdout and stderr to the log file
         });
@@ -73,7 +80,7 @@ router.post('/scrape', (req, res) => {
         // Detach the child process so it runs independently
         child.unref();
 
-        res.json({ message: 'Scraping started in the background!' });
+        res.json({ message: `Scraping started in the background${source ? ' for ' + source : ''}!` });
     } catch (error) {
         console.error('Error starting scraper:', error);
         res.status(500).json({ error: 'Failed to start scraper' });
