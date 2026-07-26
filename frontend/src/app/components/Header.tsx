@@ -153,7 +153,7 @@ export default function Header() {
                 <button 
                   type="button"
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  className="bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:text-emerald-400 text-gray-300 rounded-full px-3 md:px-4 py-2 text-sm font-bold transition-all flex items-center gap-2 h-10"
+                  className="cursor-pointer bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:text-emerald-400 text-gray-300 rounded-full px-3 md:px-4 py-2 text-sm font-bold transition-all flex items-center gap-2 h-10"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
                   <span className="hidden sm:inline">Filter</span>
@@ -229,7 +229,7 @@ export default function Header() {
                   )}
                   <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/10">
                     <span className="text-white font-bold">{user.username}</span>
-                    <button onClick={logout} className="text-gray-500 hover:text-red-400 transition-colors text-xs uppercase tracking-wider font-bold">Logout</button>
+                    <button onClick={logout} className="cursor-pointer text-gray-500 hover:text-red-400 transition-colors text-xs uppercase tracking-wider font-bold">Logout</button>
                   </div>
                 </>
               )}
@@ -258,7 +258,7 @@ export default function Header() {
               )}
               <div className="border-t border-white/5 pt-4 mt-2 flex items-center justify-between">
                 <span className="text-white font-bold">{user.username}</span>
-                <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className="text-red-400 font-bold text-sm uppercase tracking-wider">Logout</button>
+                <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className="cursor-pointer text-red-400 font-bold text-sm uppercase tracking-wider">Logout</button>
               </div>
             </>
           ) : (

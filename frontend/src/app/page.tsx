@@ -308,7 +308,7 @@ function HomeContent() {
               <button 
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors border border-white/10 flex items-center gap-2"
+                className="cursor-pointer px-6 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors border border-white/10 flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 Previous
@@ -322,7 +322,7 @@ function HomeContent() {
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum as number)}
-                      className={`w-10 h-10 rounded-xl font-medium transition-all flex items-center justify-center ${
+                      className={`cursor-pointer w-10 h-10 rounded-xl font-medium transition-all flex items-center justify-center ${
                         currentPage === pageNum 
                           ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
                           : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
@@ -337,7 +337,7 @@ function HomeContent() {
               <button 
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === meta.totalPages}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium shadow-[0_0_15px_rgba(16,185,129,0.3)] rounded-xl transition-all flex items-center gap-2"
+                className="cursor-pointer px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium shadow-[0_0_15px_rgba(16,185,129,0.3)] rounded-xl transition-all flex items-center gap-2"
               >
                 Next
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
