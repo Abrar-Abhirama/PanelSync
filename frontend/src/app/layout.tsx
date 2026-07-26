@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 import Header from "./components/Header";
 import { AuthProvider } from "./contexts/AuthContext";
 import GlobalLoginModal from "./components/GlobalLoginModal";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -33,7 +34,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#0a0a0c] overflow-x-hidden">
         <AuthProvider>
-          <Header />
+          <Suspense fallback={<div className="h-16 border-b border-white/5 bg-[#0a0a0c]"></div>}>
+            <Header />
+          </Suspense>
           {children}
           <GlobalLoginModal />
         </AuthProvider>
