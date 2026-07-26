@@ -68,15 +68,18 @@ export default function Header() {
     if (!isTyping) return;
     
     const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
       if (searchQuery.trim()) {
-        router.push(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+        params.set('q', searchQuery.trim());
       } else {
-        router.push(`/`);
+        params.delete('q');
       }
+      params.set('page', '1');
+      router.push(`/?${params.toString()}`);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, isTyping, router]);
+  }, [searchQuery, isTyping, router, searchParams]);
 
   useEffect(() => {
     const controlNavbar = () => {

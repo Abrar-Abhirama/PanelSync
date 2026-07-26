@@ -110,11 +110,9 @@ function HomeContent() {
   };
 
   const handlePageChange = (newPage: number) => {
-    if (searchQuery) {
-      router.push(`/?q=${encodeURIComponent(searchQuery)}&page=${newPage}`);
-    } else {
-      router.push(`/?page=${newPage}`);
-    }
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    router.push(`/?${params.toString()}`);
   };
 
   const getPageNumbers = () => {
