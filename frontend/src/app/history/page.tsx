@@ -35,6 +35,27 @@ export default function HistoryPage() {
     }
   }, [user, token, isAuthLoading, router]);
 
+  const handleClearHistory = async () => {
+    if (!window.confirm("Apakah kamu yakin ingin menghapus seluruh riwayat bacamu? (Tindakan ini tidak bisa dibatalkan)")) return;
+
+    if (token) {
+      try {
+        const res = await fetch('/api/user/recent', {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          setHistory([]);
+        } else {
+          alert('Gagal menghapus riwayat');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Terjadi kesalahan saat menghapus riwayat');
+      }
+    }
+  };
+
   if (isAuthLoading || loading) {
     return (
       <main className="min-h-screen pt-24 pb-12">
@@ -50,7 +71,7 @@ export default function HistoryPage() {
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Header Section */}
-        <div className="mb-10 flex items-center justify-between">
+        <div className="mb-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
             <h1 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
               <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,6 +81,18 @@ export default function HistoryPage() {
             </h1>
             <p className="text-gray-400 text-sm">Pick up right where you left off.</p>
           </div>
+          
+          {history.length > 0 && (
+            <button
+              onClick={handleClearHistory}
+              className="px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/30 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Clear History
+            </button>
+          )}
         </div>
 
         {/* Empty State */}

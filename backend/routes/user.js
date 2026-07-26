@@ -140,4 +140,20 @@ router.get('/progress/:comicId', authenticateToken, async (req, res) => {
   }
 });
 
+// 4. Clear all history
+router.delete('/recent', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Delete all reading progress
+    await prisma.readingProgress.deleteMany({ where: { userId } });
+    // Delete all reading history records
+    await prisma.readingHistory.deleteMany({ where: { userId } });
+    
+    res.json({ success: true, message: 'History cleared' });
+  } catch (error) {
+    console.error('Failed to clear history:', error);
+    res.status(500).json({ error: 'Failed to clear history' });
+  }
+});
+
 export default router;
