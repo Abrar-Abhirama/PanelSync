@@ -21,7 +21,10 @@ router.get('/', async (req, res) => {
       whereClause.title = { contains: search, mode: 'insensitive' };
     }
     if (genre) {
-      whereClause.genres = { has: genre };
+      const genresList = genre.split(',').map(g => g.trim()).filter(Boolean);
+      if (genresList.length > 0) {
+        whereClause.genres = { hasEvery: genresList };
+      }
     }
     if (source) {
       // e.g. "Asura Scans", "MangaDex"

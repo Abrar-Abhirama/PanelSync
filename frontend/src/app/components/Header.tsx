@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,9 +16,27 @@ export default function Header() {
   const { user, logout, openLoginModal } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isChapterPage = pathname.includes('/chapter/');
   const [comicCover, setComicCover] = useState<string | null>(null);
   const [dynamicGenres, setDynamicGenres] = useState<string[]>([]);
+
+  const currentGenres = searchParams.get('genre') ? searchParams.get('genre')!.split(',') : [];
+
+  const toggleGenre = (genre: string) => {
+    const newGenres = currentGenres.includes(genre)
+      ? currentGenres.filter(g => g !== genre)
+      : [...currentGenres, genre];
+    
+    const params = new URLSearchParams(searchParams.toString());
+    if (newGenres.length > 0) {
+      params.set('genre', newGenres.join(','));
+    } else {
+      params.delete('genre');
+    }
+    params.set('page', '1');
+    router.push(`/?${params.toString()}`);
+  };
 
   // Fetch unique genres from backend
   useEffect(() => {
@@ -148,18 +166,21 @@ export default function Header() {
                       {dynamicGenres.length === 0 && (
                          <div className="px-4 py-2 text-xs text-gray-500 italic">Loading...</div>
                       )}
-                      {dynamicGenres.map(genre => (
-                        <button
-                          key={genre}
-                          onClick={() => {
-                            setIsFilterOpen(false);
-                            router.push(`/?genre=${encodeURIComponent(genre)}`);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-emerald-500/20 hover:text-emerald-400 transition-colors"
-                        >
-                          {genre}
-                        </button>
-                      ))}
+                      {dynamicGenres.map(genre => {
+                        const isSelected = currentGenres.includes(genre);
+                        return (
+                          <button
+                            key={genre}
+                            onClick={() => toggleGenre(genre)}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center justify-between ${
+                              isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'text-gray-300 hover:bg-white/5'
+                            }`}
+                          >
+                            <span>{genre}</span>
+                            {isSelected && <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
+                          </button>
+                        );
+                      })}
                       <div className="border-t border-white/5 mt-1 pt-1">
                         <button
                           onClick={() => {
