@@ -195,19 +195,43 @@ export default function ComicDetail() {
                   {comic.releaseDate}
                 </span>
               )}
+              {comic.type && (
+                <span className="bg-pink-500/10 text-pink-400 border border-pink-500/30 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                  {comic.type}
+                </span>
+              )}
+              {comic.demographic && (
+                <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                  {comic.demographic}
+                </span>
+              )}
             </div>
 
+            <div className="mb-4 flex flex-col gap-1">
+              {comic.author && (
+                <p className="text-emerald-400 font-medium text-sm tracking-wide">
+                  Story by {comic.author}
+                </p>
+              )}
+              {comic.artist && comic.artist !== comic.author && (
+                <p className="text-teal-400 font-medium text-sm tracking-wide">
+                  Art by {comic.artist}
+                </p>
+              )}
+            </div>
 
-
-            {comic.author && (
-              <p className="text-emerald-400 font-medium mb-4 text-sm tracking-wide">
-                By {comic.author}
-              </p>
-            )}
-
-            <p className="text-gray-300 mb-8 leading-relaxed text-lg line-clamp-6">
+            <p className="text-gray-300 mb-6 leading-relaxed text-lg line-clamp-6">
               {comic.description}
             </p>
+
+            {comic.altTitles && comic.altTitles.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Alternative Titles</h3>
+                <p className="text-gray-400 text-sm italic">
+                  {comic.altTitles.join(', ')}
+                </p>
+              </div>
+            )}
 
             {/* Genres */}
             {comic.genres && comic.genres.length > 0 && (
@@ -274,6 +298,11 @@ export default function ComicDetail() {
                     <span className="font-medium text-gray-300 group-hover:text-emerald-400 transition-colors">
                       {chapter.title || `Chapter ${chapter.chapterNumber}`}
                     </span>
+                    {chapter.translator && (
+                      <span className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                        {chapter.translator}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     {chapter.releaseDate && isRecent(chapter.releaseDate) && (

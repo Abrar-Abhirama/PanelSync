@@ -114,27 +114,52 @@ export default class AsuraAdapter extends ComicSource {
         });
 
         let author = null;
+        let artist = null;
         let releaseDate = null;
-        
+        let type = 'Manhwa'; // Default Asura
+        let serialization = null;
+        let altTitles = [];
+        let demographic = null;
+
         // Try parsing `.imptdt` blocks which contain key-value pairs (Old Layout)
         $('.imptdt').each((_, el) => {
             const text = $(el).text().toLowerCase();
             if (text.includes('author')) {
                 author = $(el).find('i').text().trim() || $(el).text().replace(/author/i, '').trim();
             }
+            if (text.includes('artist')) {
+                artist = $(el).find('i').text().trim() || $(el).text().replace(/artist/i, '').trim();
+            }
             if (text.includes('released')) {
                 releaseDate = $(el).find('i').text().trim() || $(el).text().replace(/released/i, '').trim();
+            }
+            if (text.includes('type')) {
+                const foundType = $(el).find('a').text().trim() || $(el).text().replace(/type/i, '').trim();
+                if (foundType) type = foundType;
+            }
+            if (text.includes('serialization')) {
+                serialization = $(el).find('i').text().trim() || $(el).text().replace(/serialization/i, '').trim();
             }
         });
 
         // Backup for New Asura Layout
         if (!author) {
-            const authorMatch = $('body').text().match(/(?:Author|Artist)\s+([A-Za-z0-9 ]+)/i);
+            const authorMatch = $('body').text().match(/Author\s+([A-Za-z0-9 ]+)/i);
             if (authorMatch) author = authorMatch[1].trim();
+        }
+        if (!artist) {
+            const artistMatch = $('body').text().match(/Artist\s+([A-Za-z0-9 ]+)/i);
+            if (artistMatch) artist = artistMatch[1].trim();
         }
         if (!releaseDate) {
             const releaseMatch = $('body').text().match(/Released\s+([A-Za-z0-9, ]+)/i);
             if (releaseMatch) releaseDate = releaseMatch[1].trim();
+        }
+        
+        // Extract Alternative Titles (Synonyms)
+        const altMatch = $('body').text().match(/(?:Alternative|Synonyms)\s+([^\n]+)/i);
+        if (altMatch) {
+            altTitles = altMatch[1].split(',').map(t => t.trim()).filter(Boolean);
         }
 
         // Status extraction (Ongoing/Completed)
@@ -200,7 +225,8 @@ export default class AsuraAdapter extends ComicSource {
                     title: title,
                     chapterNumber: chapterNumber,
                     sourceUrl: chapterUrl,
-                    releaseDate: releaseDate || null
+                    releaseDate: releaseDate || null,
+                    translator: "Asura Scans"
                 });
             }
         }
@@ -212,11 +238,16 @@ export default class AsuraAdapter extends ComicSource {
             coverUrl,
             sourceUrl: comicUrl,
             author,
+            artist,
             rating,
             genres,
             releaseDate: releaseDate, // Comic release Date
             status,
             language,
+            type,
+            altTitles,
+            demographic,
+            serialization,
             sourceName: this.sourceName,
             chapters
         };

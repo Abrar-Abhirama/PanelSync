@@ -65,6 +65,9 @@ export default class MangaDexAdapter extends ComicSource {
             const authorRel = manga.relationships.find(rel => rel.type === 'author');
             const author = authorRel?.attributes?.name || 'Unknown Author';
 
+            const artistRel = manga.relationships.find(rel => rel.type === 'artist');
+            const artist = artistRel?.attributes?.name || null;
+
             const coverRel = manga.relationships.find(rel => rel.type === 'cover_art');
             const coverFileName = coverRel?.attributes?.fileName;
             const coverUrl = coverFileName ? `${this.uploadsUrl}/covers/${manga.id}/${coverFileName}` : null;
@@ -99,14 +102,30 @@ export default class MangaDexAdapter extends ComicSource {
                 language = 'English';
             }
 
+            const originalLang = manga.attributes.originalLanguage;
+            let type = null;
+            if (originalLang === 'ja') type = 'Manga';
+            else if (originalLang === 'ko') type = 'Manhwa';
+            else if (originalLang === 'zh' || originalLang === 'zh-hk') type = 'Manhua';
+
+            const altTitles = manga.attributes.altTitles ? manga.attributes.altTitles.map(t => Object.values(t)[0]) : [];
+            const demographic = manga.attributes.publicationDemographic || null;
+            // Publisher/serialization is complicated in MangaDex without extra relationship queries, we leave it null or map from tags if needed
+            const serialization = null; 
+
             return {
                 title,
                 description,
                 author,
+                artist,
                 coverUrl,
                 genres,
                 status: status,
                 language: language,
+                type,
+                altTitles,
+                demographic,
+                serialization,
                 rating,
                 releaseDate: manga.attributes.year?.toString() || null
             };
@@ -119,7 +138,7 @@ export default class MangaDexAdapter extends ComicSource {
     async getChapters(sourceId) {
         try {
             // Fetch English chapters, ordered descending
-            const res = await axios.get(`${this.baseUrl}/manga/${sourceId}/feed?translatedLanguage[]=en&order[chapter]=desc&limit=100`, {
+            const res = await axios.get(`${this.baseUrl}/manga/${sourceId}/feed?translatedLanguage[]=en&order[chapter]=desc&limit=100&includes[]=scanlation_group`, {
                 headers: { 'User-Agent': 'PanelSync-App/1.0 (Mozilla/5.0)' },
                 httpsAgent
             });
@@ -144,12 +163,16 @@ export default class MangaDexAdapter extends ComicSource {
                         releaseDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     }
 
+                    const scanlationRel = ch.relationships?.find(r => r.type === 'scanlation_group');
+                    const translator = scanlationRel?.attributes?.name || null;
+
                     uniqueChapters.push({
                         sourceId: ch.id,
                         title: ch.attributes.title || `Chapter ${ch.attributes.chapter}`,
                         chapterNumber: chapterNumber,
                         sourceUrl: `https://mangadex.org/chapter/${ch.id}`,
-                        releaseDate: releaseDate
+                        releaseDate: releaseDate,
+                        translator: translator
                     });
                 }
             }return uniqueChapters;
