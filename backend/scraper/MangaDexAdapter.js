@@ -88,13 +88,25 @@ export default class MangaDexAdapter extends ComicSource {
                 console.log(`[MangaDexAdapter] Could not fetch rating for ${sourceId}`);
             }
 
+
+            let status = manga.attributes.status || null;
+            if (status) status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+
+            let language = 'English';
+            if (manga.attributes.availableTranslatedLanguages?.includes('id')) {
+                language = 'Indonesian / English';
+            } else if (manga.attributes.availableTranslatedLanguages?.includes('en')) {
+                language = 'English';
+            }
+
             return {
                 title,
                 description,
                 author,
                 coverUrl,
                 genres,
-                status: manga.attributes.status,
+                status: status,
+                language: language,
                 rating,
                 releaseDate: manga.attributes.year?.toString() || null
             };
@@ -119,20 +131,28 @@ export default class MangaDexAdapter extends ComicSource {
             const seenNumbers = new Set();
 
             for (const ch of data.data) {
-                const chapNum = parseFloat(ch.attributes.chapter);
-                if (isNaN(chapNum) || seenNumbers.has(chapNum)) continue;
+                const chapterNumber = ch.attributes.chapter ? parseFloat(ch.attributes.chapter) : 0;
+                
+                // If we haven't seen this chapter number yet, add it
+                if (!seenNumbers.has(chapterNumber)) {
+                    seenNumbers.add(chapterNumber);
 
-                seenNumbers.add(chapNum);
+                    // Extract release Date from publishAt
+                    let releaseDate = null;
+                    if (ch.attributes.publishAt) {
+                        const dateObj = new Date(ch.attributes.publishAt);
+                        releaseDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    }
 
-                uniqueChapters.push({
-                    sourceId: ch.id,
-                    title: ch.attributes.title || `Chapter ${chapNum}`,
-                    chapterNumber: chapNum,
-                    url: `https://mangadex.org/chapter/${ch.id}`
-                });
-            }
-
-            return uniqueChapters;
+                    uniqueChapters.push({
+                        sourceId: ch.id,
+                        title: ch.attributes.title || `Chapter ${ch.attributes.chapter}`,
+                        chapterNumber: chapterNumber,
+                        sourceUrl: `https://mangadex.org/chapter/${ch.id}`,
+                        releaseDate: releaseDate
+                    });
+                }
+            }return uniqueChapters;
         } catch (error) {
             console.error(`[MangaDexAdapter] Error getting chapters for ${sourceId}: ${error.message}`);
             return [];

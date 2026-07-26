@@ -163,6 +163,20 @@ export default function ComicDetail() {
                   {comic.rating}
                 </span>
               )}
+              {comic.status && (
+                <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                  comic.status.toLowerCase() === 'ongoing' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                  comic.status.toLowerCase() === 'completed' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                  'bg-orange-500/10 text-orange-400 border-orange-500/30'
+                }`}>
+                  {comic.status}
+                </span>
+              )}
+              {comic.language && (
+                <span className="bg-purple-500/10 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                  {comic.language}
+                </span>
+              )}
               {comic.releaseDate && (
                 <span className="bg-white/5 text-gray-300 border border-white/10 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
                   {comic.releaseDate}
@@ -243,9 +257,16 @@ export default function ComicDetail() {
                   href={`/comic/${comic.id}/chapter/${chapter.id}`}
                   className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 p-4 rounded-xl transition-all flex justify-between items-center hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5"
                 >
-                  <span className="font-medium text-gray-300 group-hover:text-emerald-400 transition-colors">
-                    {chapter.title || `Chapter ${chapter.chapterNumber}`}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-300 group-hover:text-emerald-400 transition-colors">
+                      {chapter.title || `Chapter ${chapter.chapterNumber}`}
+                    </span>
+                    {chapter.releaseDate && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        {chapter.releaseDate}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs font-semibold text-gray-500 group-hover:text-emerald-500 transition-colors uppercase tracking-wider">
                     Read
                   </span>

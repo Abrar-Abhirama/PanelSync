@@ -25,6 +25,8 @@ model Comic {
   sourceId         String?            @unique
   author           String?
   rating           Float?
+  status           String?
+  language         String?
   genres           String[]
   releaseDate      String?
   sourceName       String?
@@ -43,6 +45,7 @@ model Chapter {
   chapterNumber    Float
   sourceId         String?            @unique
   sourceUrl        String?            @db.Text
+  releaseDate      String?
   createdAt        DateTime           @default(now())
   pages            Page[]
   readingProgress  ReadingProgress[]

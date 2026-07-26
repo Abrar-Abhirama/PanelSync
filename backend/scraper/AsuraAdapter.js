@@ -137,6 +137,16 @@ export default class AsuraAdapter extends ComicSource {
             if (releaseMatch) releaseDate = releaseMatch[1].trim();
         }
 
+        // Status extraction (Ongoing/Completed)
+        let status = null;
+        if ($('body').text().match(/(Ongoing|Completed|Hiatus)/i)) {
+            status = $('body').text().match(/(Ongoing|Completed|Hiatus)/i)[1];
+            // capitalize
+            status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        }
+
+        const language = "English";
+
         const chapters = [];
         // Use a generic selector for chapter links to be safe against class changes
         const chapterElements = $('a[href*="/chapter/"]').toArray();
@@ -148,6 +158,12 @@ export default class AsuraAdapter extends ComicSource {
             
             const title = $el.find('.font-medium').text().trim().replace('<!-- -->', '') || `Chapter ${chapters.length + 1}`;
             
+            // Extract chapter release date from parent text
+            const parentText = $el.parent().parent().text().replace(/\s+/g, ' ').trim();
+            let releaseDate = parentText.replace(title, '').trim();
+            if (releaseDate.startsWith(title)) releaseDate = releaseDate.replace(title, '').trim();
+            if (releaseDate.length > 50) releaseDate = null; // sanity check
+
             // Extract a unique chapter ID from the URL (e.g. /chapter/6 -> 6)
             const urlParts = rawUrl.split('/').filter(Boolean);
             const chapterId = urlParts[urlParts.length - 1] || '';
@@ -180,20 +196,27 @@ export default class AsuraAdapter extends ComicSource {
 
             if (chapterUrl && chapterId) {
                 chapters.push({
-                    sourceId: `asura-${comicSlug}-chap-${chapterId}`,
+                    sourceId: chapterId,
                     title: title,
                     chapterNumber: chapterNumber,
-                    url: chapterUrl
+                    sourceUrl: chapterUrl,
+                    releaseDate: releaseDate || null
                 });
             }
         }
 
         return {
+            sourceId: `asura-${comicUrl.split('/').filter(Boolean).pop()}`,
+            title,
             description,
+            coverUrl,
+            sourceUrl: comicUrl,
             author,
             rating,
             genres,
-            releaseDate,
+            releaseDate: releaseDate, // Comic release Date
+            status,
+            language,
             sourceName: this.sourceName,
             chapters
         };
