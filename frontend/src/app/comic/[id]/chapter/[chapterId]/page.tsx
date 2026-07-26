@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { useAuth } from '../../../../contexts/AuthContext';
 import Cookies from 'js-cookie';
@@ -18,16 +18,27 @@ export default function ChapterReadingPage() {
   const [showUI, setShowUI] = useState(true);
   const { user, token, isLoading: isAuthLoading, openLoginModal } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [readingMode, setReadingMode] = useState<'long_strip' | 'single_page'>('long_strip');
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const router = useRouter();
 
   // Load saved settings
   useEffect(() => {
     const savedWidth = localStorage.getItem('reader_image_width');
     if (savedWidth) setImageWidth(savedWidth);
+    
+    const savedMode = localStorage.getItem('reader_mode') as 'long_strip' | 'single_page';
+    if (savedMode) setReadingMode(savedMode);
   }, []);
 
   const changeImageWidth = (width: string) => {
     setImageWidth(width);
     localStorage.setItem('reader_image_width', width);
+  };
+
+  const changeReadingMode = (mode: 'long_strip' | 'single_page') => {
+    setReadingMode(mode);
+    localStorage.setItem('reader_mode', mode);
   };
 
   // Paywall Logic & Tracking Progress
@@ -100,28 +111,69 @@ export default function ChapterReadingPage() {
     );
   }
 
+  const handleLeftClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (readingMode === 'single_page') {
+      if (currentPageIndex > 0) {
+        setCurrentPageIndex(currentPageIndex - 1);
+        window.scrollTo(0, 0);
+      } else if (chapter.prevChapterId) {
+        router.push(`/comic/${params.id}/chapter/${chapter.prevChapterId}`);
+      }
+    } else {
+      window.scrollBy({ top: -(window.innerHeight * 0.8), behavior: 'smooth' });
+    }
+  };
+
+  const handleRightClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (readingMode === 'single_page') {
+      if (chapter.pages && currentPageIndex < chapter.pages.length - 1) {
+        setCurrentPageIndex(currentPageIndex + 1);
+        window.scrollTo(0, 0);
+      } else if (chapter.nextChapterId) {
+        router.push(`/comic/${params.id}/chapter/${chapter.nextChapterId}`);
+      }
+    } else {
+      window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+    }
+  };
+
   return (
     <main 
-      className="min-h-screen bg-[#050505] text-white selection:bg-emerald-500/30 cursor-pointer"
-      onClick={() => setShowUI(!showUI)}
+      className="min-h-screen bg-[#050505] text-white selection:bg-emerald-500/30 relative"
     >
+      {/* Tap Navigation Zones */}
+      <div className="fixed inset-0 z-30 flex">
+        <div className="w-[30%] h-full cursor-pointer" onClick={handleLeftClick} />
+        <div className="w-[40%] h-full cursor-pointer" onClick={() => setShowUI(!showUI)} />
+        <div className="w-[30%] h-full cursor-pointer" onClick={handleRightClick} />
+      </div>
       {/* Comic Pages Container */}
       <div className={`pt-24 pb-24 flex flex-col items-center w-full mx-auto bg-black shadow-2xl min-h-screen transition-all duration-300 ${imageWidth}`}>
         {chapter.pages && chapter.pages.length > 0 ? (
-          chapter.pages.map((page: any) => (
-            <div key={page.id} className="w-full relative mb-1 bg-gray-900 min-h-[400px] flex items-center justify-center">
-              {/* Fallback text while image loads */}
-              <span className="absolute text-gray-700 text-sm">Page {page.pageNumber}</span>
-              
-              {/* The Actual Comic Page Image */}
+          readingMode === 'single_page' ? (
+            <div className="w-full relative bg-gray-900 min-h-[400px] flex items-center justify-center">
+              <span className="absolute text-gray-700 text-sm z-0">Page {chapter.pages[currentPageIndex]?.pageNumber}</span>
               <img 
-                src={`/api/proxy?url=${encodeURIComponent(page.imageUrl)}`} 
-                alt={`Page ${page.pageNumber}`}
-                className="w-full h-auto relative z-10"
-                loading="lazy" // Helps performance by only loading images as you scroll to them
+                src={`/api/proxy?url=${encodeURIComponent(chapter.pages[currentPageIndex]?.imageUrl)}`} 
+                alt={`Page ${chapter.pages[currentPageIndex]?.pageNumber}`}
+                className="w-full max-h-screen object-contain relative z-10"
               />
             </div>
-          ))
+          ) : (
+            chapter.pages.map((page: any) => (
+              <div key={page.id} className="w-full relative mb-1 bg-gray-900 min-h-[400px] flex items-center justify-center">
+                <span className="absolute text-gray-700 text-sm z-0">Page {page.pageNumber}</span>
+                <img 
+                  src={`/api/proxy?url=${encodeURIComponent(page.imageUrl)}`} 
+                  alt={`Page ${page.pageNumber}`}
+                  className="w-full h-auto relative z-10"
+                  loading="lazy" 
+                />
+              </div>
+            ))
+          )
         ) : (
           <div className="flex flex-col items-center justify-center mt-32 text-center p-6 bg-[#0a0a0c] border border-white/5 rounded-2xl max-w-md mx-auto relative z-20" onClick={(e) => e.stopPropagation()}>
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-6 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
@@ -262,6 +314,28 @@ export default function ChapterReadingPage() {
             </div>
             
             <div className="p-5 flex flex-col gap-6">
+              {/* Reading Mode Setting */}
+              <div>
+                <label className="text-sm font-bold text-gray-400 mb-3 block uppercase tracking-wider">Reading Mode</label>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => changeReadingMode('long_strip')}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${readingMode === 'long_strip' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10'}`}
+                  >
+                    Long Strip
+                  </button>
+                  <button 
+                    onClick={() => {
+                      changeReadingMode('single_page');
+                      setCurrentPageIndex(0);
+                    }}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${readingMode === 'single_page' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10'}`}
+                  >
+                    Single Page
+                  </button>
+                </div>
+              </div>
+
               {/* Image Width Setting */}
               <div>
                 <label className="text-sm font-bold text-gray-400 mb-3 block uppercase tracking-wider">Image Width</label>
