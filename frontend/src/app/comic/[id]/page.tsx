@@ -201,7 +201,7 @@ export default function ComicDetail() {
 
             <div className="mt-auto pt-6">
               {/* Action Buttons */}
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {comic.chapters && comic.chapters.length > 0 && (
                   <Link 
                     href={readingProgress ? `/comic/${comic.id}/chapter/${readingProgress.chapterId}` : `/comic/${comic.id}/chapter/${firstChapterId}`}
