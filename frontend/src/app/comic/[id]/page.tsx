@@ -87,6 +87,19 @@ export default function ComicDetail() {
     }
   };
 
+  const isRecent = (dateStr: string) => {
+    if (!dateStr) return false;
+    const lower = dateStr.toLowerCase();
+    if (lower.includes('ago') || lower.includes('min') || lower.includes('hour') || lower.includes('today')) return true;
+    
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const diffDays = (new Date().getTime() - d.getTime()) / (1000 * 3600 * 24);
+      return diffDays <= 3;
+    }
+    return false;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
@@ -261,15 +274,17 @@ export default function ComicDetail() {
                     <span className="font-medium text-gray-300 group-hover:text-emerald-400 transition-colors">
                       {chapter.title || `Chapter ${chapter.chapterNumber}`}
                     </span>
-                    {chapter.releaseDate && (
-                      <span className="text-xs text-gray-500 mt-0.5">
-                        {chapter.releaseDate}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {chapter.releaseDate && isRecent(chapter.releaseDate) && (
+                      <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                        Recent
                       </span>
                     )}
+                    <span className="text-xs font-semibold text-gray-500 group-hover:text-emerald-500 transition-colors tracking-wider whitespace-nowrap">
+                      {chapter.releaseDate || 'READ'}
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold text-gray-500 group-hover:text-emerald-500 transition-colors uppercase tracking-wider">
-                    Read
-                  </span>
                 </Link>
               ))}
             </div>
