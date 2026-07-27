@@ -176,7 +176,7 @@ function HomeContent() {
       )}
 
       {/* LATEST UPDATES / SEARCH RESULTS */}
-      <div className="mb-8 flex items-end justify-between">
+      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-white mb-2">
             {searchQuery 
