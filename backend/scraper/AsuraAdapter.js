@@ -225,7 +225,7 @@ export default class AsuraAdapter extends ComicSource {
 
             if (chapterUrl && chapterId) {
                 chapters.push({
-                    sourceId: chapterId,
+                    sourceId: `asura-${comicSlug}-${chapterId}`,
                     title: title,
                     chapterNumber: chapterNumber,
                     sourceUrl: chapterUrl,
