@@ -60,8 +60,8 @@ router.post('/scrape', (req, res) => {
     try {
         const { source } = req.body;
         // We use spawn to run the scraper in the background without blocking the API response
-        const scriptPath = path.resolve('scraper/workerScrapeAll.js');
-        const logPath = path.resolve('scraper.log');
+        const scriptPath = path.join(__dirname, '../scraper/workerScrapeAll.js');
+        const logPath = path.join(__dirname, '../scraper.log');
         
         // Open file in write mode to overwrite old logs
         fs.writeFileSync(logPath, '');
@@ -122,7 +122,7 @@ router.post('/scrape/stop', (req, res) => {
 // Get Live Logs
 router.get('/logs', (req, res) => {
     try {
-        const logPath = path.resolve('scraper.log');
+        const logPath = path.join(__dirname, '../scraper.log');
         if (fs.existsSync(logPath)) {
             const content = fs.readFileSync(logPath, 'utf8');
             // Slice the last 10000 characters to keep the payload lightweight
