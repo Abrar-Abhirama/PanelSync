@@ -238,7 +238,9 @@ router.post('/:id/sync', async (req, res) => {
                         title: ch.title,
                         chapterNumber: ch.chapterNumber,
                         sourceId: ch.sourceId,
-                        sourceUrl: ch.url
+                        sourceUrl: ch.sourceUrl,
+                        releaseDate: ch.releaseDate || null,
+                        translator: ch.translator || null
                     }
                 });
                 newChaptersAdded++;

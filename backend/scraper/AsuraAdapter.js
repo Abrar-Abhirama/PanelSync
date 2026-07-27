@@ -224,14 +224,17 @@ export default class AsuraAdapter extends ComicSource {
             const comicSlug = urlParts[urlParts.length - 3] || 'unknown';
 
             if (chapterUrl && chapterId) {
-                chapters.push({
-                    sourceId: `asura-${comicSlug}-${chapterId}`,
-                    title: title,
-                    chapterNumber: chapterNumber,
-                    sourceUrl: chapterUrl,
-                    releaseDate: releaseDate || null,
-                    translator: "Asura Scans"
-                });
+                const sourceId = `asura-${comicSlug}-${chapterId}`;
+                if (!chapters.some(c => c.sourceId === sourceId)) {
+                    chapters.push({
+                        sourceId: sourceId,
+                        title: title,
+                        chapterNumber: chapterNumber,
+                        sourceUrl: chapterUrl,
+                        releaseDate: releaseDate || null,
+                        translator: "Asura Scans"
+                    });
+                }
             }
         }
 
