@@ -189,10 +189,9 @@ router.get('/chapters/:chapterId', async (req, res) => {
 
 // 4. Ghost Sync: On-Demand check for new chapters
 router.post('/:id/sync', async (req, res) => {
-  // Ghost Sync disabled temporarily for debugging purposes as requested by user
-  return res.json({ updated: false, message: 'Ghost Sync disabled for debugging' });
-  
   const { id } = req.params;
+  
+  try {
     const comic = await prisma.comic.findUnique({
       where: { id: parseInt(id) },
       include: { chapters: true }
@@ -207,12 +206,10 @@ router.post('/:id/sync', async (req, res) => {
     let adapter;
     if (comic.sourceName === 'Asura Scans') {
         adapter = new AsuraAdapter();
-    } else if (comic.sourceName === 'MangaDex') {
-        adapter = new MangaDexAdapter();
-    }
+    } 
 
     if (!adapter) {
-        return res.status(400).json({ error: 'Unsupported source for ghost sync' });
+        return res.status(400).json({ error: 'Unsupported source for ghost sync (MangaDex disabled)' });
     }
 
     try {

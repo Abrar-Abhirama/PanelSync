@@ -48,15 +48,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const SYNC_INTERVAL = 6 * 60 * 60 * 1000;
 
-setInterval(() => {
-    console.log('[Scheduler] Starting auto-sync...');
-    const workerPath = path.join(__dirname, 'scraper', 'workerScrapeAll.js');
-    fork(workerPath);
-}, SYNC_INTERVAL);
+// setInterval(() => {
+//     console.log('[Scheduler] Starting auto-sync...');
+//     const workerPath = path.join(__dirname, 'scraper', 'workerScrapeAll.js');
+//     fork(workerPath);
+// }, SYNC_INTERVAL);
 
 // Optional: Run it once on startup after 10 seconds
-setTimeout(() => {
-    console.log('[Scheduler] Running initial startup sync...');
-    const workerPath = path.join(__dirname, 'scraper', 'workerScrapeAll.js');
-    fork(workerPath);
-}, 10000);
+// setTimeout(() => {
+//     console.log('[Scheduler] Running initial startup sync...');
+//     const workerPath = path.join(__dirname, 'scraper', 'workerScrapeAll.js');
+//     fork(workerPath);
+// }, 10000);
