@@ -132,7 +132,7 @@ function HomeContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 overflow-x-hidden">
       
       {/* RECENT READS SECTION */}
       {user && recentReads.length > 0 && !searchQuery && (
@@ -148,12 +148,12 @@ function HomeContent() {
               View All <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </Link>
           </div>
-          <div className="flex overflow-x-auto gap-6 pb-6 snap-x custom-scrollbar-x">
+          <div className="flex overflow-x-auto gap-4 pb-6 snap-x custom-scrollbar-x w-full">
             {recentReads.map((progress: any) => (
               <Link 
                 href={`/comic/${progress.comic.id}/chapter/${progress.chapter.id}`}
                 key={progress.comic.id}
-                className="snap-start shrink-0 w-[300px] group flex gap-4 bg-white/5 border border-white/5 hover:border-emerald-500/30 hover:bg-white/10 rounded-xl p-3 transition-all hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 items-center"
+                className="snap-start shrink-0 w-[calc(100vw-4rem)] max-w-[300px] group flex gap-4 bg-white/5 border border-white/5 hover:border-emerald-500/30 hover:bg-white/10 rounded-xl p-3 transition-all hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 items-center"
               >
                 <div className="w-16 h-20 shrink-0 rounded-lg overflow-hidden shadow-lg">
                   <img src={`/api/proxy?url=${encodeURIComponent(progress.comic.coverUrl)}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
