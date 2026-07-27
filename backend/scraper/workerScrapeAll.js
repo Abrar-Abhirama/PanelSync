@@ -154,9 +154,7 @@ async function runWorker() {
                                     title: ch.title,
                                     chapterNumber: ch.chapterNumber,
                                     sourceId: ch.sourceId,
-                                    sourceUrl: ch.sourceUrl || ch.url,
-                                    releaseDate: ch.releaseDate || null,
-                                    translator: ch.translator || null
+                                    sourceUrl: ch.sourceUrl || ch.url
                                 }
                             });
                             savedCount++;
