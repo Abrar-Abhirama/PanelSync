@@ -5,18 +5,10 @@ async function test() {
     const details = await adapter.getDetails('https://asurascans.com/comics/return-of-the-unrivaled-spear-knight-059befe1');
     const chapters = details.chapters;
     console.log("Chapters length:", chapters.length);
-    
-    const ids = new Set();
-    const duplicates = [];
-    for (const ch of chapters) {
-        if (ids.has(ch.sourceId)) {
-            duplicates.push(ch.sourceId);
-        }
-        ids.add(ch.sourceId);
-    }
-    console.log("Duplicates found:", duplicates.length);
-    if (duplicates.length > 0) {
-        console.log("Sample duplicates:", duplicates.slice(0, 5));
+    if (chapters.length > 0) {
+        console.log("Sample chapter 1:", chapters[0]);
+        console.log("Sample chapter 2:", chapters[1]);
+        console.log("Sample chapter 3:", chapters[2]);
     }
 }
 test().catch(console.error);
