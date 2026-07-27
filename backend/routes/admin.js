@@ -72,6 +72,23 @@ router.post('/scrape', (req, res) => {
             args.push(source);
         }
         
+        // Prevent multiple instances of the scraper from running simultaneously
+        try {
+            if (process.platform === 'win32') {
+                const tasklist = execSync('wmic process where "commandline like \'%workerScrapeAll.js%\'" get commandline').toString();
+                if (tasklist.split('\n').filter(line => line.includes('workerScrapeAll.js')).length > 1) { // >1 because wmic itself might show up, or the check itself
+                   return res.status(429).json({ error: 'Scraper is already running!' });
+                }
+            } else {
+                execSync('pgrep -f workerScrapeAll.js');
+                return res.status(429).json({ error: 'Scraper is already running!' });
+            }
+        } catch (e) {
+            // pgrep throws an error (exit code 1) if no process is found, which means we are good to go!
+            // For Windows, it might throw if wmic fails, but we'll proceed anyway.
+        }
+
+        
         const child = spawn('node', args, {
             detached: true,
             stdio: ['ignore', logStream, logStream] // Pipe stdout and stderr to the log file
