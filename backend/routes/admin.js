@@ -65,7 +65,6 @@ router.post('/scrape', (req, res) => {
         
         // Open file in write mode to overwrite old logs
         fs.writeFileSync(logPath, '');
-        const logStream = fs.openSync(logPath, 'a');
 
         const args = [scriptPath];
         if (source) {
@@ -91,7 +90,15 @@ router.post('/scrape', (req, res) => {
         
         const child = spawn('node', args, {
             detached: true,
-            stdio: ['ignore', logStream, logStream] // Pipe stdout and stderr to the log file
+            stdio: ['ignore', 'pipe', 'pipe']
+        });
+
+        // Pipe to file manually to avoid block-buffering delays
+        child.stdout.on('data', (data) => {
+            fs.appendFile(logPath, data, (err) => { if(err) console.error('Log write error:', err); });
+        });
+        child.stderr.on('data', (data) => {
+            fs.appendFile(logPath, data, (err) => { if(err) console.error('Log write error:', err); });
         });
 
         // Detach the child process so it runs independently
