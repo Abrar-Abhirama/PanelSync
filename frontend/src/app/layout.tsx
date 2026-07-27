@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   description: "Read your favorite manga and manhwa in one beautiful place.",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 import Header from "./components/Header";
 import { AuthProvider } from "./contexts/AuthContext";
 import GlobalLoginModal from "./components/GlobalLoginModal";
@@ -30,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased overflow-x-hidden`}
     >
       <body className="min-h-full flex flex-col bg-[#0a0a0c] overflow-x-hidden">
         <AuthProvider>
