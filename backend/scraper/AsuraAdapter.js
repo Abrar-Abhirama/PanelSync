@@ -79,6 +79,10 @@ export default class AsuraAdapter extends ComicSource {
     async getDetails(comicUrl) {
         const html = await this._fetchHtml(comicUrl);
         const $ = cheerio.load(html);
+
+        // --- EXTRACT TITLE & COVER ---
+        let title = $('meta[property="og:title"]').attr('content') || $('title').text().split('-')[0].trim() || $('h1').first().text().trim();
+        let coverUrl = $('meta[property="og:image"]').attr('content') || $('img').filter((_, el) => $(el).attr('src')?.includes('cover')).attr('src') || '';
         
         // --- EXTRACT DESCRIPTION ---
         // Asura's new layout nests things weirdly. We will find the longest block of pure text in a span or p tag.
