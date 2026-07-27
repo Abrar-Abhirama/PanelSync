@@ -7,6 +7,7 @@ async function delay(ms) {
 }
 
 async function runWorker() {
+    console.log("Welcome");
     console.log("=== Starting Multi-Source Full-Library Scraper ===");
     const targetSource = process.argv[2];
     if (targetSource) console.log(`[Target Source]: ${targetSource}`);
