@@ -136,7 +136,7 @@ export default function Header() {
             <div className="flex-1 flex justify-center">
               {comicCover && (
                 <Link href={`/comic/${pathname.match(/\/comic\/(\d+)\/chapter/)?.[1]}`}>
-                  <img src={`/api/proxy?url=${encodeURIComponent(comicCover)}`} alt="Cover" className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-110 transition-transform" />
+                  <img src={`/api/proxy?url=${encodeURIComponent(comicCover)}`} alt="Cover" className="w-8 h-11 rounded-md object-cover border border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-110 transition-transform" />
                 </Link>
               )}
             </div>
