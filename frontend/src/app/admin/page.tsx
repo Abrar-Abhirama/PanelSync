@@ -140,7 +140,11 @@ export default function AdminDashboard() {
         body: JSON.stringify(source ? { source } : {})
       });
       const data = await res.json();
-      setMessage(data.message || 'Scraping started!');
+      if (data.error) {
+        setMessage(data.error);
+      } else {
+        setMessage(data.message || 'Scraping started!');
+      }
     } catch (error) {
       setMessage('Failed to start scraper.');
     } finally {

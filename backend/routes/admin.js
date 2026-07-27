@@ -63,9 +63,6 @@ router.post('/scrape', (req, res) => {
         const scriptPath = path.join(__dirname, '../scraper/workerScrapeAll.js');
         const logPath = path.join(__dirname, '../scraper.log');
         
-        // Open file in write mode to overwrite old logs
-        fs.writeFileSync(logPath, '');
-
         const args = [scriptPath];
         if (source) {
             args.push(source);
@@ -79,13 +76,16 @@ router.post('/scrape', (req, res) => {
                    return res.status(429).json({ error: 'Scraper is already running!' });
                 }
             } else {
-                execSync('pgrep -f workerScrapeAll.js');
+                execSync('pgrep -f "[w]orkerScrapeAll.js"');
                 return res.status(429).json({ error: 'Scraper is already running!' });
             }
         } catch (e) {
             // pgrep throws an error (exit code 1) if no process is found, which means we are good to go!
             // For Windows, it might throw if wmic fails, but we'll proceed anyway.
         }
+
+        // Open file in write mode to overwrite old logs only AFTER passing the check
+        fs.writeFileSync(logPath, '');
 
         
         const child = spawn('node', args, {

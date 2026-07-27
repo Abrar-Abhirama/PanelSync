@@ -144,32 +144,25 @@ async function runWorker() {
                     
                     if (chapters.length > 0) {
                         const reversedChapters = [...chapters].reverse();
-                        let savedCount = 0;
-                        for (const ch of reversedChapters) {
-                            try {
-                                await prisma.chapter.upsert({
-                                    where: { sourceId: ch.sourceId },
-                                    update: {},
-                                    create: {
-                                        comicId: comic.id,
-                                        title: ch.title,
-                                        chapterNumber: ch.chapterNumber,
-                                        sourceId: ch.sourceId,
-                                        sourceUrl: ch.sourceUrl || ch.url,
-                                        releaseDate: ch.releaseDate || null,
-                                        translator: ch.translator || null
-                                    }
-                                });
-                                savedCount++;
-                            } catch (err) {
-                                // If P2002 (Unique constraint failed) happens, it means another process (like Ghost Sync or a duplicate scraper worker) 
-                                // already inserted this exact chapter milliseconds ago. We can safely ignore it.
-                                if (err.code !== 'P2002') {
-                                    throw err;
-                                }
-                            }
+                        const chaptersData = reversedChapters.map(ch => ({
+                            comicId: comic.id,
+                            title: ch.title,
+                            chapterNumber: ch.chapterNumber,
+                            sourceId: ch.sourceId,
+                            sourceUrl: ch.sourceUrl || ch.url,
+                            releaseDate: ch.releaseDate || null,
+                            translator: ch.translator || null
+                        }));
+
+                        try {
+                            const result = await prisma.chapter.createMany({
+                                data: chaptersData,
+                                skipDuplicates: true
+                            });
+                            console.log(`Successfully saved ${result.count} new chapters!`);
+                        } catch (err) {
+                            console.error('Error bulk inserting chapters:', err.message);
                         }
-                        console.log(`Successfully saved ${savedCount} chapters!`);
                     } else {
                         console.log(`No chapters found for this comic.`);
                     }

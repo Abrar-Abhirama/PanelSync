@@ -224,31 +224,32 @@ router.post('/:id/sync', async (req, res) => {
       
       if (fetchedChapters && fetchedChapters.length > 0) {
         let newChaptersAdded = 0;
-        const reversedChapters = [...fetchedChapters].reverse();
-        
-        for (const ch of reversedChapters) {
-            // Check if we already have it
-            const existing = comic.chapters.find(c => c.sourceId === ch.sourceId);
-            if (!existing) {
-                await prisma.chapter.create({
-                    data: {
-                        comicId: comic.id,
-                        title: ch.title,
-                        chapterNumber: ch.chapterNumber,
-                        sourceId: ch.sourceId,
-                        sourceUrl: ch.sourceUrl,
-                        releaseDate: ch.releaseDate || null,
-                        translator: ch.translator || null
-                    }
-                });
-                newChaptersAdded++;
-            }
+        const chaptersData = [...fetchedChapters].reverse().map(ch => ({
+          comicId: comic.id,
+          title: ch.title,
+          chapterNumber: ch.chapterNumber,
+          sourceId: ch.sourceId,
+          sourceUrl: ch.sourceUrl || ch.url,
+          releaseDate: ch.releaseDate || null,
+          translator: ch.translator || null
+        }));
+
+        let hasNew = false;
+        try {
+          const result = await prisma.chapter.createMany({
+            data: chaptersData,
+            skipDuplicates: true
+          });
+          if (result.count > 0) {
+            hasNew = true;
+            console.log(`[GhostSync] Added ${result.count} new chapters for comic ${comic.id}`);
+          }
+        } catch (err) {
+          console.error('[GhostSync] DB Error:', err);
         }
         
-        console.log(`[Ghost Sync] Sync complete. Found ${newChaptersAdded} new chapters.`);
-        
         // Return updated chapter list if new chapters were found
-        if (newChaptersAdded > 0) {
+        if (hasNew) {
            const updatedComic = await prisma.comic.findUnique({
              where: { id: parseInt(id) },
              include: { 
