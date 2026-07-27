@@ -187,10 +187,13 @@ export default class AsuraAdapter extends ComicSource {
             
             const title = $el.find('.font-medium').text().trim().replace('<!-- -->', '') || `Chapter ${chapters.length + 1}`;
             
-            // Extract chapter release date from parent text
-            const parentText = $el.parent().parent().text().replace(/\s+/g, ' ').trim();
-            let releaseDate = parentText.replace(title, '').trim();
-            if (releaseDate.startsWith(title)) releaseDate = releaseDate.replace(title, '').trim();
+            // Extract chapter release date (usually in a span with text-sm or text-white/40)
+            let releaseDate = $el.find('.text-sm, .text-white\\/40, .text-gray-400, .text-gray-500').last().text().trim();
+            if (!releaseDate) {
+                // Fallback: remove title from full text
+                const fullText = $el.text().replace(/\s+/g, ' ').trim();
+                releaseDate = fullText.replace(title, '').trim();
+            }
             if (releaseDate.length > 50) releaseDate = null; // sanity check
 
             // Extract a unique chapter ID from the URL (e.g. /chapter/6 -> 6)
