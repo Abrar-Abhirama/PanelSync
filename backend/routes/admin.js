@@ -5,6 +5,10 @@ import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import prisma from '../prismaClient.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-me';
