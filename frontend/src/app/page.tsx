@@ -234,12 +234,15 @@ function HomeContent() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 gap-y-10">
             {comics.map((comic: any, index: number) => (
-              <Link 
-                href={`/comic/${comic.id}`}
+              <div 
                 key={comic.id} 
-                className="group flex flex-col gap-3 h-full"
+                className="group flex flex-col gap-3 h-full relative"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
+                {/* Clickable Overlay for the whole card */}
+                <Link href={`/comic/${comic.id}`} className="absolute inset-0 z-10" prefetch={true}>
+                  <span className="sr-only">View {comic.title}</span>
+                </Link>
                 {/* Comic Cover with Glassmorphism Overlay */}
                 <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 transition-all duration-300 group-hover:ring-emerald-500/50 group-hover:shadow-emerald-500/20 group-hover:-translate-y-2">
                   <img 
@@ -289,7 +292,7 @@ function HomeContent() {
                     </p>
                     <button 
                       onClick={(e) => toggleBookmark(e, comic.id)}
-                      className="p-1.5 rounded-md hover:bg-white/10 transition-colors z-20"
+                      className="p-1.5 rounded-md hover:bg-white/10 transition-colors z-20 relative"
                       title={bookmarkedIds.has(comic.id) ? "Remove Bookmark" : "Add Bookmark"}
                     >
                       <svg className={`w-5 h-5 ${bookmarkedIds.has(comic.id) ? 'text-emerald-400 fill-emerald-400' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -298,7 +301,7 @@ function HomeContent() {
                     </button>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
 
