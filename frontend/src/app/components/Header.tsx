@@ -107,10 +107,10 @@ export default function Header() {
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex ${isChapterPage ? 'flex-row' : 'flex-col md:flex-row'} items-center justify-between gap-3 md:gap-0`}>
         
         {/* Top Row on Mobile: Logo & Hamburger */}
-        <div className="flex items-center justify-between w-full md:w-auto">
+        <div className={`flex items-center justify-between ${isChapterPage ? 'w-auto' : 'w-full md:w-auto'}`}>
           <Link href="/" className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500">
             Comicly.
           </Link>
