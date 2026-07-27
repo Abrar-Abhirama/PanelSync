@@ -11,7 +11,7 @@ async function runWorker() {
     const targetSource = process.argv[2];
     if (targetSource) console.log(`[Target Source]: ${targetSource}`);
     
-    const allAdapters = [new AsuraAdapter(), new MangaDexAdapter()];
+    const allAdapters = [new AsuraAdapter()]; // MangaDex temporarily disabled as requested
     const adapters = targetSource 
         ? allAdapters.filter(a => a.sourceName === targetSource)
         : allAdapters;

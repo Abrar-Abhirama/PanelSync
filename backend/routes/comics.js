@@ -189,9 +189,10 @@ router.get('/chapters/:chapterId', async (req, res) => {
 
 // 4. Ghost Sync: On-Demand check for new chapters
 router.post('/:id/sync', async (req, res) => {
-  const { id } = req.params;
+  // Ghost Sync disabled temporarily for debugging purposes as requested by user
+  return res.json({ updated: false, message: 'Ghost Sync disabled for debugging' });
   
-  try {
+  const { id } = req.params;
     const comic = await prisma.comic.findUnique({
       where: { id: parseInt(id) },
       include: { chapters: true }
