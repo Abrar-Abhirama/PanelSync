@@ -88,7 +88,7 @@ export default function ComicDetail() {
   };
 
   const isRecent = (dateStr: string) => {
-    if (!dateStr) return false;
+    if (!dateStr || typeof dateStr !== 'string') return false;
     const lower = dateStr.toLowerCase();
     if (lower.includes('ago') || lower.includes('min') || lower.includes('hour') || lower.includes('today')) return true;
     
@@ -224,7 +224,7 @@ export default function ComicDetail() {
               {comic.description}
             </p>
 
-            {comic.altTitles && comic.altTitles.length > 0 && (
+            {Array.isArray(comic.altTitles) && comic.altTitles.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Alternative Titles</h3>
                 <p className="text-gray-400 text-sm italic">
@@ -232,9 +232,17 @@ export default function ComicDetail() {
                 </p>
               </div>
             )}
+            {typeof comic.altTitles === 'string' && (
+              <div className="mb-8">
+                <h3 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Alternative Titles</h3>
+                <p className="text-gray-400 text-sm italic">
+                  {comic.altTitles}
+                </p>
+              </div>
+            )}
 
             {/* Genres */}
-            {comic.genres && comic.genres.length > 0 && (
+            {Array.isArray(comic.genres) && comic.genres.length > 0 && (
               <div className="mt-8">
                 <h3 className="text-sm font-bold text-gray-400 mb-3 uppercase tracking-wider">Genres</h3>
                 <div className="flex flex-wrap gap-2">
