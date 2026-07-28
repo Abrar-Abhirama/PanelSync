@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
 import * as cheerio from 'cheerio';
+import { spawn } from 'child_process';
 import ComicSource from './ComicSource.js';
 
 export default class AsuraAdapter extends ComicSource {
@@ -22,39 +23,35 @@ export default class AsuraAdapter extends ComicSource {
         return;
     }
 
-    async _fetchHtml(url, retries = 4) {
+    async _fetchHtml(url, retries = 3) {
         console.log(`[AsuraAdapter] Fetching: ${url}`);
         
-        const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-            'Sec-Ch-Ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Platform': '"Windows"',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-            'Connection': 'keep-alive'
-        };
-
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
-                const response = await fetch(url, { headers });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                return await response.text();
+                // Use curl subprocess - it bypasses Cloudflare TLS fingerprinting that blocks Node.js on VPS
+                const html = await new Promise((resolve, reject) => {
+                    const args = [
+                        '-s', '-L', '--max-time', '30',
+                        '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                        '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        '-H', 'Accept-Language: en-US,en;q=0.9',
+                        url
+                    ];
+                    const curl = spawn('curl', args);
+                    let data = '';
+                    let errData = '';
+                    curl.stdout.on('data', chunk => data += chunk);
+                    curl.stderr.on('data', chunk => errData += chunk);
+                    curl.on('close', code => {
+                        if (code === 0 && data.length > 100) resolve(data);
+                        else reject(new Error(`curl exited with code ${code}: ${errData}`));
+                    });
+                    curl.on('error', reject);
+                });
+                return html;
             } catch (error) {
                 if (attempt < retries) {
-                    const delay = attempt * 3000; // 3s, 6s, 9s
+                    const delay = attempt * 4000;
                     console.warn(`[AsuraAdapter] Attempt ${attempt}/${retries} failed (${error.message}). Retrying in ${delay/1000}s...`);
                     await new Promise(r => setTimeout(r, delay));
                 } else {
